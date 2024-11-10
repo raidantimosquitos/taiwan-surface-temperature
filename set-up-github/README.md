@@ -19,10 +19,10 @@ Create an account (if you do not have one already) on GitHub to manage the proje
 ## Setting up Git on your computer
 You can set your GitHub username and email on your computer's Git configuration, to do so run below commands in your Terminal of choice.
 ```bash
-git config --global user.name  “My Name”
-git config --global user.email  “my@email.com”
+git config --global user.name  “username”
+git config --global user.email  “username@github.com”
 ```
-Remember to substitute "My Name" and "my@email.com" for your GitHub credentials.
+Remember to substitute "username" and "username@github.com" for your GitHub credentials. In my case *raidantimosquitos* and *raidantimosquitos@github.com*.
 
 You can check that the configuration changes have been applied (check for user.name and user.email values) by running:
 ```bash
@@ -31,7 +31,7 @@ git config -l
 
 ## Setting up your GitHub authentication key
 In order to be able to *commit* and *push* changes from your computer to the GitHub repository, you will need to authenticate your *pushes* with a GitHub authentication key. The following instructions show you how to generate this key.
-1. (Verify)[https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-email-preferences/verifying-your-email-address] your email address in GitHub if it has not yet been verified.
+1. [Verify](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-email-preferences/verifying-your-email-address) your email address in GitHub if it has not yet been verified.
 2. In the upper-right corner of any page on GitHub, click your profile photo, then click  **Settings**.
 3. In the left sidebar, click **Developer** settings.
 4. In the left sidebar, under **Personal access tokens**, click **Tokens (classic)**.
@@ -46,7 +46,7 @@ In order to be able to *commit* and *push* changes from your computer to the Git
 11. Paste your token on a text file and save it in your local PC (outside the repository directory), you will need it when *pushing* changes to the repoistory and it will not be visible again in the GitHub page.
 
 ## Cloning the taiwan-surface-temperature repository
-- First access to the (GitHub page)[https://github.com/raidantimosquitos/taiwan-surface-temperature] of the repository, on the top right area you will find a `Fork` button. Click it and, after some seconds, in your GitHub account a new project with the same name `taiwan-surface-temperature` will be created.
+- First access to the [GitHub page](https://github.com/raidantimosquitos/taiwan-surface-temperature) of the repository, on the top right area you will find a `Fork` button. Click it and, after some seconds, in your GitHub account a new project with the same name `taiwan-surface-temperature` will be created.
 - In the main page of the repository under your GitHub user, find the `Branch:master` button and use it to create a new branch, for instance with your name on it (*michael-jackson*).
 - Now you can make a copy of the repository on your local computer, click on the <>Code icon, and in the pop-up you can click the copy icon (make sure you are in Codespaces/HTTPS tab).
 
@@ -94,7 +94,7 @@ git push -u origin michael-jackson
 
 *In pink color is GitHub username (raidantimosquitos), in yellow the GitHub authentication token you generated earlier, and in orange is your personal GitHub password*.
 
-*Please also note that in this example I am commiting directly to the main repository branch, this should not be your case (you should be committing to your personal branch)*
+*Please also note that in this example I am pushing directly to the main repository branch, this should not be your case (you should be committing to your personal branch)*
 
 - This will *push* the changes you made on your local computer to your branch of the repository.
 
