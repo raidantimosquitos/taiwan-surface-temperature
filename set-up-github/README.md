@@ -88,6 +88,14 @@ git commit -m "Commit message"
 ```bash
 git push -u origin michael-jackson
 ```
+- When running this command the terminal will prompt you to identify yourself, you need to use your GitHub username and authentication key as username+password combination for the first time. Then you will get prompted for the same information again, this time you use your GitHub username and password.
+  
+<img src="img/git-commit.png" width="1000" align="center">
+
+*In pink color is GitHub username (raidantimosquitos), in yellow the GitHub authentication token you generated earlier, and in orange is your personal GitHub password*.
+
+*Please also note that in this example I am commiting directly to the main repository branch, this should not be your case (you should be committing to your personal branch)*
+
 - This will *push* the changes you made on your local computer to your branch of the repository.
 
 - When you want to merge all the changes made in your local branch to the master branch of the repository you can use GitHub `pull-request` mechanism.
