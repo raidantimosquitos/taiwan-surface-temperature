@@ -6,6 +6,7 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import plotly.graph_objs as go
 from scipy import stats
+import seaborn as sns
 
 d = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 datasets_dir = d + '/datasets/'
@@ -187,3 +188,108 @@ layout = go.Layout(
 
 fig = go.Figure(data=data, layout=layout)
 fig.show()
+
+# Convert 'dt' to datetime format
+df_tw['dt'] = pd.to_datetime(df_tw['dt'])
+
+# Grouping data by seasons
+df_tw['Month'] = df_tw['dt'].dt.month
+
+# Plot
+plt.figure(figsize=(16, 10))
+sns.lineplot(data=df_tw, x='Month', y='AverageTemperature', hue='City', marker='o')
+plt.title('Seasonal Temperature Patterns in Taiwanese Cities', fontsize=18)
+plt.xlabel('Month', fontsize=14)
+plt.ylabel('Average Temperature (°C)', fontsize=14)
+plt.xticks(range(1, 13), ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
+plt.legend(title='City', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# Rename the dt dataframe column
+df_tw = df_tw.rename(columns={'dt': 'date'})
+
+# Create new dataframe with date time features and seasons
+df_features = df_tw.copy()
+df_features['date'] = pd.to_datetime(df_features['date'])
+df_features['year'] = df_features['date'].dt.year
+df_features['month'] = df_features['date'].dt.month
+
+def get_season(month):
+    if month in [12, 1, 2]:
+        return 'Winter'
+    elif month in [3, 4, 5]:
+        return 'Spring'
+    elif month in [6, 7, 8]:
+        return 'Summer'
+    elif month in [9, 10, 11]:
+        return 'Fall'
+    
+df_features['season'] = df_features['date'].dt.month.apply(get_season)
+
+# Box Plot for temperatures distribution in Taiwan per season
+plt.figure(figsize=(12, 8))
+sns.boxplot(data=df_features, x='season', y='AverageTemperature', palette='coolwarm')
+plt.title('Temperature Distribution by Season', fontsize=18)
+plt.xlabel('Season', fontsize=14)
+plt.ylabel('Average Temperature (°C)', fontsize=14)
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# Ensure 'season' column is categorical with specific order
+season_order = ['Winter', 'Spring', 'Summer', 'Fall']
+df_features['season'] = pd.Categorical(df_features['season'], categories=season_order, ordered=True)
+
+# Compute the average temperature by season
+seasonal_avg_temp = df_features.groupby('season')['AverageTemperature'].mean().reset_index()
+
+# Bar plot for average temperature by season
+plt.figure(figsize=(10, 6))
+sns.barplot(data=seasonal_avg_temp, x='season', y='AverageTemperature', palette='coolwarm')
+plt.title('Average Temperature by Season', fontsize=18)
+plt.xlabel('Season', fontsize=14)
+plt.ylabel('Average Temperature (°C)', fontsize=14)
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# Create one extra column in the dataframe to indicate weather the temperature is above or
+# below the average of that season.
+baseline_avg_temp = df_features.groupby('season')['AverageTemperature'].mean()
+df_features['Anomaly'] = df_features.apply(lambda row: row['AverageTemperature'] - baseline_avg_temp[row['season']], axis=1)
+
+# Compute average anomalies by season
+seasonal_anomalies = df_features.groupby('season')['Anomaly'].mean().reset_index()
+
+# Plot anomalies
+plt.figure(figsize=(10, 6))
+sns.barplot(data=seasonal_anomalies, x='season', y='Anomaly', palette='coolwarm')
+plt.title('Average Temperature Anomalies by Season', fontsize=18)
+plt.xlabel('Season', fontsize=14)
+plt.ylabel('Temperature Anomaly (°C)', fontsize=14)
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+
+# Compute average temperature for each season and year
+seasonal_temp_trend = df_features.groupby(['Year', 'season'])['AverageTemperature'].mean().reset_index()
+
+# Plot
+plt.figure(figsize=(16, 10))
+sns.lineplot(data=seasonal_temp_trend, x='Year', y='AverageTemperature', hue='season', marker='o')
+plt.title('Seasonal Temperature Trends Over Time (1841-2013)', fontsize=18)
+plt.xlabel('Year', fontsize=14)
+plt.ylabel('Average Temperature (°C)', fontsize=14)
+plt.legend(title='Season', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# Plot missing values heatmap
+plt.figure(figsize=(12, 7))
+sns.heatmap(df_features.isnull(), cbar=False, cmap='summer', yticklabels=False)
+plt.title('Missing Data Heatmap')
+plt.show()
