@@ -97,6 +97,41 @@ I computed the average temperature for each cities, and plotted them according t
 
 <img src="img/average_temp_in_taiwanese_cities.png" width="1000" align="center">
 
-Also, I included the average land temperature trend for all Taiwan in dataset samples. You can appreciate the increasing trend for temperature with time, in green color you have the year 1970, arbitrary value I marked as global warming start point (this can be changed).
+I included the average land temperature trend for all Taiwan in dataset samples. You can appreciate the increasing trend for temperature with time, in green color you have the year 1970, arbitrary value I marked as global warming start point (this can be changed). According to the computed tendency, the average land temperature was increased by almost 1.4^o^C from 1841 to 2013. To put this into perspective, the mean surface temperature for the whole Taiwan in 2022 was of 24.1^o^C according to the [Central Weather Administration of Taiwan (CWA)](https://www.cwa.gov.tw/Data/service/notice/download/Publish_20230914153735.pdf) indicating the rising trend to more present days.
 
 <img src="img/trend_land_temp_in_taiwan.png" width="1000" align="center">
+
+You can see also seasonal patterns on temperature in taiwanese cities, as expected summer months are considerably warmer than winter months. Peak temperatures occur in the month inverval between June and October.
+
+<img src="img/seasonal-temperature-patterns-in-taiwan-cities.png" width="1000" align="center">
+
+I divided the seasons according to the standard understanding, where Dec-Feb is winter, Mar-May is spring, Jun-Aug is summer and Sep-Nov is fall. I plotted the temperature variation per season considering all records, you can see that Spring and Autumn are the seasons with more statistical variance, due to temperature records varying the most within the months of these seasons. On the other hand, winter and summer seasons show the most correlation within their data samples.
+
+<img src="img/temp-distribution-by-season.png" width="1000" align="center">
+
+The next plot shows the average temperature per season, logically summer months are the warmer of all year, autumn including the warm month of september is also a hotter season than spring.
+
+<img src="img/average-temperature-by-season.png" width="1000" align="center">
+
+Next up, an important measurement to take into account in temperature measurements are temperature anomalies. Temperature anomalies in a season indicate how much the temperature in a specific period deviates from the typical average for that season. A positive anomaly means the temperature was higher than usual for that season, while a negative anomaly means it was lower than usual. Here’s what these anomalies can imply in a seasonal context:
+- **Winter anomalies**:
+  * **Positive anomaly (warmer than usual)**: Taiwan’s winters are generally mild, so warmer-than-usual winters may feel unseasonably warm, especially in southern Taiwan, with less need for heating. Higher temperatures can reduce the frequency of cold surges from Siberian high-pressure systems, which usually bring cooler weather, especially to northern Taiwan.
+  * **Negative anomaly (colder than usual)**: Colder winters, often due to strong Siberian cold fronts, can lead to rare snowfall in higher elevations like Alishan and Hehuanshan. Cold anomalies may impact agriculture, particularly for crops like tea and fruit, which are sensitive to sudden temperature drops.
+- **Summer anomalies**:
+  * **Positive anomaly (warmer than usual)**: Summer heat anomalies can exacerbate urban heat island effects, particularly in Taipei and Kaohsiung. Higher-than-average temperatures might lead to increased cooling demands, potential health risks from heat stress, and heightened risk of drought, especially if typhoon frequency is lower.
+  * **Negative anomaly (colder than usual)**: Unseasonably cool summer weather is rare but could result from persistent cloud cover or typhoon influence, reducing cooling demands and potentially improving comfort. However, excessive rain may disrupt outdoor activities and impact agriculture due to overcast or rainy conditions.
+- **Spring anomalies**:
+  * **Positive anomaly (warmer than usual)**: Warmer springs could advance the growing season for crops but may also increase the risk of water shortages if rainfall patterns shift. Early warmth might affect traditional festivals or practices tied to seasonal timing, such as flower blooms.
+  * **Negative anomaly (colder than usual)**: Cooler springs can delay agricultural cycles and impact the timing of the East Asian monsoon, which usually brings Taiwan’s first major rains. This delay can influence water availability and may shift the onset of plum rains (May–June).
+- **Fall anomalies**:
+  * **Positive anomaly (warmer than usual)**: A warm autumn can extend the typhoon season, increasing the risk of late-season storms. It can also delay seasonal temperature drops, affecting tourism patterns for fall foliage in mountainous areas.
+  * **Negative anomaly (colder than usual)**: Colder autumn weather may bring an earlier start to the winter-like conditions in northern Taiwan and encourage agricultural shifts as farmers adjust to cooler temperatures.
+
+Given Taiwan’s location in East Asia, these anomalies are often influenced by broader climate patterns like the East Asian monsoon, El Niño, and La Niña. Small temperature shifts can have significant local impacts due to Taiwan’s sensitive agricultural landscape, high population density, and seasonal reliance on both monsoon rains and typhoon precipitation for water resources.
+
+*Thank you ChatGPT for providing this awesome interpretation, because I do not have much clue about climate in Spain, less even Taiwan climate*
+
+<img src="img/average-anomalies-by-season.png" width="1000" align="center">
+
+
+All in all, I think we could also make use of some of these new features (seasons and temperature anomalies) to enhance our models. Please take a look at the code if you have time, now we need to focus on handling Nulls and encoding the categorical features.
