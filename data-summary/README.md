@@ -1,70 +1,70 @@
 # taiwan-surface-temperature
-For now I only used the GlobalLandTemperaturesByCity.csv file, and found the following:
+This analysis will give insight on the *GlobalLandTemperaturesByCity.csv* data. I had to edit the coordinates (longitude and latitude) and the city names from the Berkeley Earth Surface Temperature Dataset. I output the corrected dataset in *TaiwanLandTemperaturesByCity.csv*, below points summarize the corrected dataset:
 
 Small preview of the dataset:
 ```bash
-dt  AverageTemperature  AverageTemperatureUncertainty  \
-1611881  1841-01-01              13.108                          2.519   
-1611882  1841-02-01              13.234                          1.908   
-1611883  1841-03-01              14.386                          2.383   
-1611884  1841-04-01              18.287                          2.057   
-1611885  1841-05-01              22.627                          1.423   
-...             ...                 ...                            ...   
-8455430  2013-05-01              24.013                          0.322   
-8455431  2013-06-01              26.182                          0.410   
-8455432  2013-07-01              26.700                          0.515   
-8455433  2013-08-01              26.710                          0.428   
-8455434  2013-09-01                 NaN                            NaN   
+               dt  AverageTemperature  AverageTemperatureUncertainty  \
+0      1841-01-01              13.108                          2.519   
+1      1841-02-01              13.234                          1.908   
+2      1841-03-01              14.386                          2.383   
+3      1841-04-01              18.287                          2.057   
+4      1841-05-01              22.627                          1.423   
+...           ...                 ...                            ...   
+62185  2013-05-01              24.013                          0.322   
+62186  2013-06-01              26.182                          0.410   
+62187  2013-07-01              26.700                          0.515   
+62188  2013-08-01              26.710                          0.428   
+62189  2013-09-01                 NaN                            NaN   
 
-             City Country Latitude Longitude  
-1611881   Chungho  Taiwan   24.92N   120.59E  
-1611882   Chungho  Taiwan   24.92N   120.59E  
-1611883   Chungho  Taiwan   24.92N   120.59E  
-1611884   Chungho  Taiwan   24.92N   120.59E  
-1611885   Chungho  Taiwan   24.92N   120.59E  
-...           ...     ...      ...       ...  
-8455430  Yungkang  Taiwan   23.31N   121.46E  
-8455431  Yungkang  Taiwan   23.31N   121.46E  
-8455432  Yungkang  Taiwan   23.31N   121.46E  
-8455433  Yungkang  Taiwan   23.31N   121.46E  
-8455434  Yungkang  Taiwan   23.31N   121.46E
+           City Country Latitude Longitude  
+0      Zhongzhe  Taiwan  24.9964  121.4855  
+1      Zhongzhe  Taiwan  24.9964  121.4855  
+2      Zhongzhe  Taiwan  24.9964  121.4855  
+3      Zhongzhe  Taiwan  24.9964  121.4855  
+4      Zhongzhe  Taiwan  24.9964  121.4855  
+...         ...     ...      ...       ...  
+62185  Yongkang  Taiwan  23.0229  120.2633  
+62186  Yongkang  Taiwan  23.0229  120.2633  
+62187  Yongkang  Taiwan  23.0229  120.2633  
+62188  Yongkang  Taiwan  23.0229  120.2633  
+62189  Yongkang  Taiwan  23.0229  120.2633
 ```
 
-Dataset size: (62190, 7)
+Dataset size: `(62190, 7)`
 
 Taiwanese cities in the dataset (30 in total), and number of records per city:
 ```bash
 City
-Chungho      2073
-Chupei       2073
-Yungho       2073
+Zhongzhe     2073
+Zhubei       2073
+Yonghe       2073
 Yangmei      2073
-Yüanlin      2073
-Tucheng      2073
-Touliu       2073
-Taoyüan      2073
-Tanshui      2073
-Tali         2073
+Yuanlin      2073
+Toucheng     2073
+Douliu       2073
+Taoyuan      2073
+Tamsui       2073
+Dali         2073
 Taitung      2073
 Taipei       2073
 Tainan       2073
 Taichung     2073
-Shulin       2073
-Sanhsia      2073
-Sanchung     2073
+Shuilin      2073
+Sanxia       2073
+Sanchong     2073
 Pingtung     2073
-Pingchen     2073
-Pate         2073
-Panchiao     2073
+Pingzhen     2073
+Bade         2073
+Banqiao      2073
 Nantou       2073
-Luchou       2073
-Keelung      2073
+Luzhou       2073
+Keelug       2073
 Kaohsiung    2073
-Hsintien     2073
+Xindian      2073
 Hsinchu      2073
-Hsichih      2073
-Fengshan     2073
-Yungkang     2073
+Xizhi        2073
+Fongshan     2073
+Yongkang     2073
 ```
 
 Missing values in some features (total 84 only in AverageTemperature and AverageTemperatureUncertainty features)
@@ -93,8 +93,7 @@ AverageTemperature             22.262  25.955  29.815
 AverageTemperatureUncertainty   0.363   1.065   4.755 
 ```
 
-I computed the average temperature for each cities, and plotted them according to the coordinates that appear in the dataset, it seems there is lack of precission in the latitude and longitude measurements for each city.
+I computed the average temperature for each cities, and plotted them according to the coordinates that appear in the dataset, now you can see how the southern cities of Taiwan have a higher average temperature. The same is true for the cities surrounding the Main Taipei area, this is because it lies on a river basin making the summers long, hot and humid. The more temperate cities are the ones in the central area of Taiwan.
 
-<img src="img/average_temp_in_taiwanese_cities.png" width="600" align="center">
+<img src="img/average_temp_in_taiwanese_cities.png" width="1000" align="center">
 
-`TODO: Find the correct coordinates for each of the 30 cities in the dataset, it should be easy to apply the new latitude and longitude values to all cities afterwards.`
