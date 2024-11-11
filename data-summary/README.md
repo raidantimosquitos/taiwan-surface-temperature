@@ -1,6 +1,8 @@
 # taiwan-surface-temperature
 This analysis will give insight on the *GlobalLandTemperaturesByCity.csv* data. I had to edit the coordinates (longitude and latitude) and the city names from the Berkeley Earth Surface Temperature Dataset. I output the corrected dataset in *TaiwanLandTemperaturesByCity.csv*, below points summarize the corrected dataset:
 
+## Summary of *TaiwanLandTemperaturesByCity.csv* dataset
+
 Small preview of the dataset:
 ```bash
                dt  AverageTemperature  AverageTemperatureUncertainty  \
@@ -93,26 +95,34 @@ AverageTemperature             22.262  25.955  29.815
 AverageTemperatureUncertainty   0.363   1.065   4.755 
 ```
 
+## Geographical plot of average temperature per city
+
 I computed the average temperature for each cities, and plotted them according to the coordinates that appear in the dataset, now you can see how the southern cities of Taiwan have a higher average temperature. The same is true for the cities surrounding the Main Taipei area, this is because it lies on a river basin making the summers long, hot and humid. The more temperate cities are the ones in the central area of Taiwan.
 
 <img src="img/average_temp_in_taiwanese_cities.png" width="1000" align="center">
+
+## Trend for average land temperature in Taiwan
 
 I included the average land temperature trend for all Taiwan in dataset samples. You can appreciate the increasing trend for temperature with time, in green color you have the year 1970, arbitrary value I marked as global warming start point (this can be changed). According to the computed tendency, the average land temperature was increased by almost 1.4^o^C from 1841 to 2013. To put this into perspective, the mean surface temperature for the whole Taiwan in 2022 was of 24.1^o^C according to the [Central Weather Administration of Taiwan (CWA)](https://www.cwa.gov.tw/Data/service/notice/download/Publish_20230914153735.pdf) indicating the rising trend to more present days.
 
 <img src="img/trend_land_temp_in_taiwan.png" width="1000" align="center">
 
+## Seasonal analysis
 You can see also seasonal patterns on temperature in taiwanese cities, as expected summer months are considerably warmer than winter months. Peak temperatures occur in the month inverval between June and October.
 
 <img src="img/seasonal-temperature-patterns-in-taiwan-cities.png" width="1000" align="center">
 
+### Temperature records distribution by season
 I divided the seasons according to the standard understanding, where Dec-Feb is winter, Mar-May is spring, Jun-Aug is summer and Sep-Nov is fall. I plotted the temperature variation per season considering all records, you can see that Spring and Autumn are the seasons with more statistical variance, due to temperature records varying the most within the months of these seasons. On the other hand, winter and summer seasons show the most correlation within their data samples.
 
 <img src="img/temp-distribution-by-season.png" width="1000" align="center">
 
+### Average temperature per season
 The next plot shows the average temperature per season, logically summer months are the warmer of all year, autumn including the warm month of september is also a hotter season than spring.
 
 <img src="img/average-temperature-by-season.png" width="1000" align="center">
 
+### Anomalies in average temperature data per season
 Next up, an important measurement to take into account in temperature measurements are temperature anomalies. Temperature anomalies in a season indicate how much the temperature in a specific period deviates from the typical average for that season. A positive anomaly means the temperature was higher than usual for that season, while a negative anomaly means it was lower than usual. Here’s what these anomalies can imply in a seasonal context:
 - **Winter anomalies**:
   * **Positive anomaly (warmer than usual)**: Taiwan’s winters are generally mild, so warmer-than-usual winters may feel unseasonably warm, especially in southern Taiwan, with less need for heating. Higher temperatures can reduce the frequency of cold surges from Siberian high-pressure systems, which usually bring cooler weather, especially to northern Taiwan.
@@ -134,4 +144,5 @@ Given Taiwan’s location in East Asia, these anomalies are often influenced by 
 <img src="img/average-anomalies-by-season.png" width="1000" align="center">
 
 
-All in all, I think we could also make use of some of these new features (seasons and temperature anomalies) to enhance our models. Please take a look at the code if you have time, now we need to focus on handling Nulls and encoding the categorical features.
+## Conclusions
+All in all, I think we could also make use of some of these new features (seasons and temperature anomalies) to enhance our models. You can take a look at the code if you have time, now we need to focus on handling Nulls and encoding the categorical features.
