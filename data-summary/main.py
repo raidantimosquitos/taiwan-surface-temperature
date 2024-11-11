@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
+import plotly.graph_objs as go
+from scipy import stats
 
 d = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 datasets_dir = d + '/datasets/'
@@ -108,3 +110,80 @@ plt.xlabel('Longitude')
 plt.ylabel('Latitude')
 plt.grid(True)
 plt.show()
+
+# Assuming df_cities is already loaded
+
+# Extract the year from the date
+df_tw['Year'] = df_tw['dt'].apply(lambda x: x[:4])
+
+# Group by year and calculate the average temperature and uncertainty
+tw_yearly = df_tw.groupby('Year').agg({
+    'AverageTemperature': 'mean',
+    'AverageTemperatureUncertainty': 'mean'
+}).reset_index()
+
+# Extract the values
+years = tw_yearly['Year'].astype(int).values
+mean_temp_tw = tw_yearly['AverageTemperature'].values
+mean_temp_tw_uncertainty = tw_yearly['AverageTemperatureUncertainty'].values
+
+# Calculate the trend line (linear regression)
+slope, intercept, r_value, p_value, std_err = stats.linregress(years, mean_temp_tw)
+trend_line = slope * years + intercept
+
+# Create traces for the plot
+trace0 = go.Scatter(
+    x=years, 
+    y=mean_temp_tw + mean_temp_tw_uncertainty,
+    fill=None,
+    mode='lines',
+    name='Uncertainty top',
+    line=dict(color='rgb(0, 255, 255)')
+)
+
+trace1 = go.Scatter(
+    x=years, 
+    y=mean_temp_tw - mean_temp_tw_uncertainty,
+    fill='tonexty',
+    mode='lines',
+    name='Uncertainty bot',
+    line=dict(color='rgb(0, 255, 255)')
+)
+
+trace2 = go.Scatter(
+    x=years, 
+    y=mean_temp_tw,
+    name='Average Temperature',
+    line=dict(color='rgb(199, 121, 093)')
+)
+
+# Add the trend line
+trace3 = go.Scatter(
+    x=years,
+    y=trend_line,
+    name='Trend Line',
+    line=dict(color='rgb(255, 0, 0)', dash='dash')
+)
+
+# Add a vertical line to indicate the start of global warming (around 1970)
+global_warming_start_year = 1970
+
+trace4 = go.Scatter(
+    x=[global_warming_start_year, global_warming_start_year],
+    y=[min(mean_temp_tw - mean_temp_tw_uncertainty), max(mean_temp_tw + mean_temp_tw_uncertainty)],
+    mode='lines',
+    name='Start of Global Warming',
+    line=dict(color='rgb(0, 100, 0)', dash='dot')
+)
+
+data = [trace0, trace1, trace2, trace3, trace4]
+
+layout = go.Layout(
+    xaxis=dict(title='Year'),
+    yaxis=dict(title='Average Temperature, °C'),
+    title='Average Land Temperature in Taiwan with Trend Line and Global Warming Start',
+    showlegend=True
+)
+
+fig = go.Figure(data=data, layout=layout)
+fig.show()

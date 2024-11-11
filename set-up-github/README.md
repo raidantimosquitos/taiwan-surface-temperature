@@ -10,6 +10,8 @@
 ```bash
 git --version
 ```
+*Note: to use git on Windows Powershell, you must update your PATH variable. You can follow the instructions in this [link](https://thelinuxcode.com/add-git-to-path-windows/).*
+
 - If Git is installed it should display the installed version.
 
 ## Create your account on GitHub
