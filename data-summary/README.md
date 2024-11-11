@@ -97,3 +97,6 @@ I computed the average temperature for each cities, and plotted them according t
 
 <img src="img/average_temp_in_taiwanese_cities.png" width="1000" align="center">
 
+Also, I included the average land temperature trend for all Taiwan in dataset samples. You can appreciate the increasing trend for temperature with time, in green color you have the year 1970, arbitrary value I marked as global warming start point (this can be changed).
+
+<img src="img/trend_land_temp_in_taiwan.png" width="1000" align="center">
