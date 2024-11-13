@@ -1,5 +1,39 @@
 # taiwan-surface-temperature
-This analysis will give insight on the *GlobalLandTemperaturesByCity.csv* data. I had to edit the coordinates (longitude and latitude) and the city names from the Berkeley Earth Surface Temperature Dataset. I output the corrected dataset in *TaiwanLandTemperaturesByCity.csv*, below points summarize the corrected dataset:
+This analysis will give insight on the Berkeley's Earth Surface Temperature data by cities in Taiwan. I had to edit the coordinates (longitude and latitude) and the city names from the dataset since they were not accurate. I output the corrected dataset in *TaiwanLandTemperaturesByCity.csv*, you can check the editions done in below table:
+
+| Berkeley Dataset City | Corrected City| Berkeley (long, lat) | Corrected (long, lat) |
+|-----------------------|---------------|----------------------|-----------------------|
+| Pate                  | Bade          | (24.92N, 120.59E)    | (24.9575, 121.2989)   |
+| Panchiao              | Banqiao       | (24.92N, 122.36E)    | (25.0143, 121.4672)   |
+| Tali                  | Dali          | (24.92N, 120.59E)    | (24.1049, 120.6804)   |
+| Touliu                | Douliu        | (23.31N, 119.71E)    | (23.7075, 120.5439)   |
+| Fengshan              | Fongshan      | (23.31N, 119.71E)    | (22.6118, 120.3506)   |
+| Hsinchu               | Hsinchu       | (24.92N, 120.59E)    | (24.8167, 120.9833)   |
+| Kaohsiung             | Kaohsiung     | (23.31N, 119.71E)    | (22.615, 120.2975)    |
+| Keelung               | Keelug        | (24.92N, 122.36E)    | (25.1333, 121.7333)   |
+| Luchou                | Luzhou        | (24.92N, 120.59E)    | (25.0871, 121.4708)   |
+| Nantou                | Nantou        | (23.31N, 121.46E)    | (23.9167, 120.6833)   |
+| Pingtung              | Pingtung      | (23.31N, 119.71E)    | (22.6761, 120.4942)   |
+| Pingchen              | Pingzhen      | (24.92N, 120.59E)    | (24.9439, 121.2161)   |
+| Sanchung              | Sanchong      | (24.92N, 120.59E)    | (25.0616, 121.4871)   |
+| Sanhsia               | Sanxia        | (24.92N, 120.59E)    | (24.9358, 121.3751)   |
+| Shulin                | Shuilin       | (24.92N, 120.59E)    | (23.5662, 120.234)    |
+| Taichung              | Taichung      | (24.92N, 120.59E)    | (24.1439, 120.6794)   |
+| Tainan                | Tainan        | (23.31N, 119.71E)    | (22.9833, 120.1833)   |
+| Taipei                | Taipei        | (24.92N, 122.36E)    | (25.0375, 121.5625)   |
+| Taitung               | Taitung       | (23.31N, 121.46E)    | (22.7583, 121.1444)   |
+| Tanshui               | Tamsui        | (24.92N, 120.59E)    | (25.1759, 121.4376)   |
+| Taoyüan               | Taoyuan       | (24.92N, 120.59E)    | (24.9913, 121.3143)   |
+| Tucheng               | Toucheng      | (24.92N, 120.59E)    | (24.85, 121.8167)     |
+| Hsintien              | Xindian       | (24.92N, 122.36E)    | (24.9651, 121.5326)   |
+| Hsichih               | Xizhi         | (24.92N, 122.36E)    | (25.0632, 121.6391)   |
+| Yangmei               | Yangmei       | (24.92N, 120.59E)    | (24.9167, 121.15)     |
+| Yungho                | Yonghe        | (24.92N, 122.36E)    | (25.0107, 121.5147)   |
+| Yungkang              | Yongkang      | (23.31N, 121.46E)    | (23.0229, 120.2633)   |
+| Yüanlin               | Yuanlin       | (24.92N, 120.59E)    | (23.9611, 120.5736)   |
+| Chungho               | Zhongzhe      | (24.92N, 120.59E)    | (24.9964, 121.4855)   |
+| Chupei                | Zhubei        | (24.92N, 120.59E)    | (24.8333, 121.0119)   |
+
 
 ## Summary of *TaiwanLandTemperaturesByCity.csv* dataset
 
