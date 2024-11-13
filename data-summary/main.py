@@ -17,25 +17,7 @@ pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', 50)
 pd.set_option('display.max_colwidth', None)
 
-df_cities = pd.read_csv(datasets_dir + 'berkeley-earth-surface-temp-dataset/GlobalLandTemperaturesByCity.csv')
-
-# dataframe with corrected latitude-longitude values and city names
-df_coords = pd.read_csv(datasets_dir + 'worldcities-coordinates/taiwan-city-names-and-coordinates.csv')
-df_tw = df_cities[df_cities['Country'] == 'Taiwan']
-
-# assign correct coordinates and city names to df_tw dataframe
-for index, row in df_coords.iterrows():
-    city_name = row['City']
-    corrected_cn = row['Name-equivalent']
-    lat = row['Latitude']
-    long = row['Longitude']
-
-    # changing coordinates
-    df_tw.loc[df_tw['City'] == city_name, 'Latitude'] = lat
-    df_tw.loc[df_tw['City'] == city_name, 'Longitude'] = long
-    df_tw.loc[df_tw['City'] == city_name, 'City'] = corrected_cn
-
-df_tw = df_tw.reset_index(drop=True)
+df_tw = pd.read_csv(datasets_dir + '/berkeley-earth-surface-temp-dataset/TaiwanLandTemperaturesByCity.csv')
 
 # preview of the dataset
 print(df_tw)
@@ -57,9 +39,6 @@ print('Duplicates: ', df_tw.duplicated().sum())
 
 # print description of dataset
 print(df_tw.describe().T)
-
-# output the corrected dataset
-df_tw.to_csv(output_dir + 'TaiwanLandTemperaturesByCity.csv')
 
 # After all above we can observe that our dataset has 30 cities/regions in 
 # Taiwan with total 62106 samples, no duplicates and 84 missing values in 
