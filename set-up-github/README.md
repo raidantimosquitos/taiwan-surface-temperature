@@ -48,13 +48,11 @@ In order to be able to *commit* and *push* changes from your computer to the Git
 11. Paste your token on a text file and save it in your local PC (outside the repository directory), you will need it when *pushing* changes to the repoistory and it will not be visible again in the GitHub page.
 
 ## Cloning the taiwan-surface-temperature repository
-- First access to the [GitHub page](https://github.com/raidantimosquitos/taiwan-surface-temperature) of the repository, on the top right area you will find a `Fork` button. Click it and, after some seconds, in your GitHub account a new project with the same name `taiwan-surface-temperature` will be created.
-- In the main page of the repository under your GitHub user, find the `Branch:master` button and use it to create a new branch, for instance with your name on it (*michael-jackson*).
+- First access to the [GitHub page](https://github.com/raidantimosquitos/taiwan-surface-temperature) of the repository, send me a message with your Github username. I will add you as collaborator to the repository and I will create a branch on your name (i.e. `michael-jackson`)
 - Now you can make a copy of the repository on your local computer, click on the <>Code icon, and in the pop-up you can click the copy icon (make sure you are in Codespaces/HTTPS tab).
 
 <img src="img/code_clone.png" width="640" align="center">
 
-*Note that since I created the repository, the link shows under my username (raidantimosquitos), in your case your link should show your own username*
 
 - Navigate in your terminal to the directory where you want to locate the repository (this will be a folder, you can locate it inside your Documents directory or any other of your choice). Once in the directory where you will clone the repository you run the following command, pasting the link copied before on the "project-github-url":
 
@@ -68,7 +66,7 @@ git clone "project-github-url"
 git remote add origin "project-github-url"
 ```
 
-- Change the branch to your branch (*michael-jackson*) with the following command:
+- Change the branch to your branch (i.e. `michael-jackson`) with the following command:
 
 ```bash
 git checkout michael-jackson
@@ -78,19 +76,19 @@ git checkout michael-jackson
 
 ## Submitting changes to the repository
 
-- From this moment, everytime you want to upload your local changes to the GitHub repository you must confirm the changes on your local repository.
+1. From this moment, everytime you want to upload your local changes to the GitHub repository you must confirm the changes on your local repository.
 
 ```bash
 git add .
 git commit -m "Commit message"
 ```
-- You can add a short message with your commit describing the changes you are uploading to the repository.
+2. You can add a short message with your commit describing the changes you are uploading to the repository.
 
-- Right after you run the above two commands, to upload the changes to the repository you must execute the following command:
+3. Right after you run the above two commands, to upload the changes to the repository you must execute the following command:
 ```bash
 git push -u origin michael-jackson
 ```
-- When running this command the terminal will prompt you to identify yourself, you need to use your GitHub username and authentication key as username+password combination for the first time. Then you will get prompted for the same information again, this time you use your GitHub username and password.
+4. When running this command the terminal will prompt you to identify yourself, you need to use your GitHub username and authentication key as username+password combination for the first time. Then you will get prompted for the same information again, this time you use your GitHub username and password.
   
 <img src="img/git-commit.png" width="1000" align="center">
 
@@ -98,8 +96,20 @@ git push -u origin michael-jackson
 
 *Please also note that in this example I am pushing directly to the main repository branch, this should not be your case (you should be committing to your personal branch)*
 
-- This will *push* the changes you made on your local computer to your branch of the repository.
+5. This will *push* the changes you made on your local computer to your branch of the repository.
 
-- When you want to merge all the changes made in your local branch to the master branch of the repository you can use GitHub `pull-request` mechanism.
-  * Go to the main page of the repository in your GitHub account, and make sure you are in the *michael-jackson* branch.
-  * Click on *New pull request*, and follow GitHub's instructions.
+6. You can use your branch of the repository as a backup, all the changes you push will be stored there.
+
+7. When you want to merge all the changes made in your branch to the main branch of the repository you can use GitHub `merge` command. This is usually done towards the end of the project, once you have completed all the code you want to do on your side.
+   1.  Make sure you are in your branch, you can run `git status`. It will output which branch you are currently working on and what is the status of the changes. You should see an output similar to below:
+```bash
+bash> git status
+On branch lucas-herranz
+Your branch is up to date with 'origin/lucas-herranz'.
+
+nothing to commit, working tree clean
+```
+  2. Confirm that your branch is up to date with `origin/michael-jackson` before merging to the `main` branch. If it is not up to date, you need to go through steps 1 to 4 in this section to push the changes made to your branch of the repository. 
+  3. Change your working branch to `main` branch with `git checkout main` command. Now, if you run `git status` you should see a list of all the files that have been edited or created in your branch (i.e. `michael-jackson`) and that are not present at the `main` branch. Similar to below code snippet.
+  4. Run `git merge michael-jackson` to merge the `michael-jackson` branch to the `main` branch. The output should be similar to the next code snippet.
+  5. Last, you need to run `git push -u origin main` to push the changes into the GitHub repository main branch.
