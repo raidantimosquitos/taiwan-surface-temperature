@@ -110,6 +110,12 @@ Your branch is up to date with 'origin/lucas-herranz'.
 nothing to commit, working tree clean
 ```
   2. Confirm that your branch is up to date with `origin/michael-jackson` before merging to the `main` branch. If it is not up to date, you need to go through steps 1 to 4 in this section to push the changes made to your branch of the repository. 
-  3. Change your working branch to `main` branch with `git checkout main` command. Now, if you run `git status` you should see a list of all the files that have been edited or created in your branch (i.e. `michael-jackson`) and that are not present at the `main` branch. Similar to below code snippet.
+  3. Change your working branch to `main` branch with `git checkout main` command.
   4. Run `git merge michael-jackson` to merge the `michael-jackson` branch to the `main` branch. The output should be similar to the next code snippet.
-  5. Last, you need to run `git push -u origin main` to push the changes into the GitHub repository main branch.
+```bash
+bash> git merge lucas-herranz
+Updating b76d8cb..40c2aef
+Fast-forward
+ set-up-github/README.md | 34 ++++++++++++++++++++++------------
+ 1 file changed, 22 insertions(+), 12 deletions(-)
+```
