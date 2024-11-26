@@ -10,7 +10,7 @@ This analysis will give insight on the Berkeley's Earth Surface Temperature data
 | Fengshan              | Fongshan      | (23.31N, 119.71E)    | (22.6118, 120.3506)   |
 | Hsinchu               | Hsinchu       | (24.92N, 120.59E)    | (24.8167, 120.9833)   |
 | Kaohsiung             | Kaohsiung     | (23.31N, 119.71E)    | (22.615, 120.2975)    |
-| Keelung               | Keelug        | (24.92N, 122.36E)    | (25.1333, 121.7333)   |
+| Keelung               | Keelung       | (24.92N, 122.36E)    | (25.1333, 121.7333)   |
 | Luchou                | Luzhou        | (24.92N, 120.59E)    | (25.0871, 121.4708)   |
 | Nantou                | Nantou        | (23.31N, 121.46E)    | (23.9167, 120.6833)   |
 | Pingtung              | Pingtung      | (23.31N, 119.71E)    | (22.6761, 120.4942)   |

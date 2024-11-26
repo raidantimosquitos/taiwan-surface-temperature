@@ -21,5 +21,21 @@ As pointed out by Minh there is work to do in the following areas:
 What would be nice to do if we have time is also develop some time series forecasting model. To do this we might need more data samples, but we can always use data up-sampling methods to interpolate more samples and increase our dataset size. 
 
 ## Repostory structure
+### Datasets
+Directory for storing all dataset files. For now Taiwan related only. 
+*Possible `TODO`*: Include new features or new dataset files for different types of models (possibly include temperature anomalies).
 
-For now I will move all Data summary to a new directory data-summary, you can refer to that directory if you have doubts about the dataset. 
+### data-summary
+Jupyter notebooks performing Exploratory Data Analysis. It includes a set of figures to help illustrate the dataset, also small transformations applied to the coordinates in the dataset.
+
+### Source code
+This directory includes the source code to run the program. 
+
+### Checkpoints
+Directory to save the best models after training, so it can later be used for testing
+
+### Logs
+Small folder to store possible logs during training, or other procedures of the code.
+
+### Miscellaneous: set-up-github 
+Small guide on how to set up Git and GitHub in your computer in case you want to collaborate on the repository.
