@@ -29,7 +29,22 @@ Directory for storing all dataset files. For now Taiwan related only.
 Jupyter notebooks performing Exploratory Data Analysis. It includes a set of figures to help illustrate the dataset, also small transformations applied to the coordinates in the dataset.
 
 ### Source code
-This directory includes the source code to run the program. 
+This directory includes the source code to run the program. So far I have completed the PyTorch dataset class of the dataset where I engineered some features, summarized by the following three points:
+1. Normalized `AverageTemperature` and `AverageTemperatureUncertainty` features so they are distributed in the [0,1] interval.
+2. One-hot encoded `City` feature and dropped `Country` feature.
+3. Added Lag features to exploit temporal relationship. These can be used as a hyper-parameter introducing the amount of lag features required. *What are Lag features?*
+  - Lag features represent past observations to provide temporal context. For example:
+    - If the `AverageTemperature` column contains monthly temperatures.
+      - `AverageTemperature_lag1` contains temperature from the previous month.
+      - `AverageTemperature_lag2` contains temperature from two months ago.
+      - *for the first records there is no previous temperature, so fills the feature with N/A, thus I drop N/A after generating Lag features*.
+
+
+*You might think why not normalize or standardize `longitude` and `latitude` features, well it is not recommended because of the following reasons:*
+- Small Range of Values: Since all `longitude` and `latitude` values for Taiwan fall within a narrow range, they are comparable in magnitude. This minimizes the risk of large-scale differences affecting the model training.
+- Spatial Interpretability: Geographical features like latitude and longitude can have inherent spatial relationships that models, especially neural networks, can learn better when left in their original scale. Altering these values with normalization or standardization may obscure these relationships.
+- Normalization’s Purpose: The purpose of normalization or standardization is typically to ensure features are on the same scale to avoid one dominating the model's optimization process. Here, this isn’t an issue since latitude and longitude values already have similar scales to each other and to other features
+
 
 ### Checkpoints
 Directory to save the best models after training, so it can later be used for testing

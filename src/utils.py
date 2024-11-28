@@ -2,6 +2,35 @@ import os
 import shutil
 import torch
 import numpy as np
+import pandas as pd
+
+class AddLagFeatures:
+    def __init__(self, lag: int, target_columns: list):
+        """
+        Add lag features for specific target columns.
+        :param lag: Number of lags to generate
+        :param target_columns: List of column names to apply lag features
+        """
+        self.lag = lag
+        self.target_columns = target_columns
+
+    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        for col in self.target_columns:
+            for i in range(1, self.lag + 1):
+                df[f"{col}_lag_{i}"] = df[col].shift(i)
+        return df.dropna()
+
+class ToTensor:
+    """
+        Converts data to PyTorch tensors.
+        :param x: Input features (NumPy array or DataFrame slice)
+        :param y: Target value
+        :return: Tuple of tensors
+    """
+    def __call__(self, x, y):
+        x_tensor = torch.tensor(x, dtype=torch.float32)
+        y_tensor = torch.tensor([y], dtype=torch.float32)
+        return x_tensor, y_tensor
 
 def create_directory(path):
     """
