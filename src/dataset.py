@@ -1,9 +1,8 @@
 import pandas as pd
 import numpy as np
-import torch
 from torch.utils.data import Dataset, DataLoader
-from data_preprocess import preprocess_data
-from utils import ToTensor, AddLagFeatures
+from src.data_preprocess import preprocess_data
+from src.utils import ToTensor, AddLagFeatures
 
 class TWTemperatureDataset(Dataset):
     def __init__(self, filepath: str, target_column: str, input_window: int, transforms=None):
@@ -27,6 +26,7 @@ class TWTemperatureDataset(Dataset):
         # Store data and configuration
         self.data = df
         self.target_column = target_column
+        self.dates = self.data.index
         self.input_window = input_window
         self.transforms = transforms or [ToTensor()]
 
@@ -53,6 +53,12 @@ class TWTemperatureDataset(Dataset):
         """
         # Exclude the target column from feature names
         return [col for col in self.data.columns if col != self.target_column]
+    
+    def get_dates(self):
+        """
+        Returns the dates corresponding to the target values.
+        """
+        return self.dates[self.input_window:].tolist()
 
 # Testing the functionality
 if __name__ == '__main__':
@@ -69,6 +75,8 @@ if __name__ == '__main__':
     print("New Input features: ", dataset.get_feature_names())
     print("\nExample Data Point:")
     x, y = dataset[0]
+    date = dataset.get_dates()[0]
+    print("Date of input (index): ", date)
     print("Input (x):", x)
     print("Target (y):", y)
 

@@ -35,8 +35,8 @@ class GRUModel(nn.Module):
 # Testing the models
 if __name__ == "__main__":
     # Define parameters for model initialization
-    input_dim = 10
-    hidden_dim = 64
+    input_dim = 37
+    hidden_dim = 2*37
     num_layers = 2
     output_dim = 1
 

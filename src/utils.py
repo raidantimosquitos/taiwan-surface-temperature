@@ -1,4 +1,5 @@
 import os
+
 import json
 import torch
 import pandas as pd
@@ -86,10 +87,11 @@ def plot_losses(json_file_path, output_dir):
 
     # Save the plot to the output directory
     plot_path = os.path.join(output_dir, "loss_plot.png")
-    plt.savefig(plot_path)
-    plt.show()
-
-    print(f"Loss plot saved to {plot_path}")
+    if plot_path:
+        plt.savefig(plot_path)
+        print(f"Loss Plot saved to {plot_path}")
+    else:
+        plt.show()
 
 # Testing the functions
 if __name__ == '__main__':
