@@ -1,16 +1,20 @@
 import os
+
 import json
 from datetime import datetime
 import torch
 import torch.optim as optim
 from torch.utils.data import DataLoader, Subset
 from sklearn.model_selection import TimeSeriesSplit
-from utils import save_model_checkpoint, create_directory, plot_losses, ToTensor
-from models import LSTMModel, GRUModel
-from dataset import TWTemperatureDataset
+
+from config import CHECKPOINTS_DIR
+from src.utils import save_model_checkpoint, create_directory, plot_losses, ToTensor
+from src.models import LSTMModel, GRUModel
+from src.dataset import TWTemperatureDataset
 
 
 def train(model, train_loader, cross_val_loader, criterion, optimizer, num_epochs, device, logs_dir):
+    print(f'Training with {device} device.')
     model.to(device)
     best_val_loss = float("inf")
     best_model_path = os.path.join(CHECKPOINTS_DIR, "best_model.pth")
@@ -21,12 +25,12 @@ def train(model, train_loader, cross_val_loader, criterion, optimizer, num_epoch
     for epoch in range(num_epochs):
         model.train()
         running_loss = 0.0
-        for features, labels in train_loader:
-            features, labels = features.to(device), labels.to(device)
+        for features, targets in train_loader:
+            features, targets = features.to(device), targets.to(device)
 
             # Forward pass
             outputs = model(features)
-            loss = criterion(outputs, labels)
+            loss = criterion(outputs, targets)
 
             # Backward pass and optimization
             optimizer.zero_grad()
@@ -39,12 +43,12 @@ def train(model, train_loader, cross_val_loader, criterion, optimizer, num_epoch
         val_loss = 0.0
         model.eval()
         with torch.no_grad():
-            for inputs, labels in cross_val_loader:
-                inputs, labels = inputs.to(device), labels.to(device)
+            for inputs, targets in cross_val_loader:
+                inputs, targets = inputs.to(device), targets.to(device)
                 
                 # Forward pass
                 outputs = model(inputs)
-                loss = criterion(outputs, labels)
+                loss = criterion(outputs, targets)
                 val_loss += loss.item()
 
         val_loss /= len(cross_val_loader)
@@ -60,12 +64,16 @@ def train(model, train_loader, cross_val_loader, criterion, optimizer, num_epoch
             print(f"New best model found! Validation Loss: {val_loss:.4f}")
             save_model_checkpoint(model, best_model_path)
 
-    # Save loss history to logs
-    logs_file = os.path.join(logs_dir, "loss_history.json")
+    # Save loss history to logs and plot it
+    directory_logs = os.path.join(logs_dir, datetime.now().strftime("%Y-%m-%d-%H-%M"))
+    create_directory(directory_logs)
+    logs_file = os.path.join(directory_logs, "loss_history.json")
     with open(logs_file, "w") as f:
         json.dump(loss_history, f)
     print(f"Loss history saved to {logs_file}")
     print(f"Training complete. Best Validation Loss: {best_val_loss:.4f}")
+    
+    return directory_logs
 
 # Testing the code
 if __name__ == "__main__":
@@ -81,14 +89,11 @@ if __name__ == "__main__":
     NUM_EPOCHS = 10
     DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    print(f'Training with {DEVICE} device.')
-
     # Create the dataset
     dataset = TWTemperatureDataset(filepath=FILEPATH, target_column=TARGET_COLUMN, input_window=INPUT_WINDOW, transforms=[ToTensor()])
     in_size = len(dataset.get_feature_names())
 
-    # Split dataset into train-crossval-test
-    # TimeSeriesSplit for train-validation-test
+    # TimeSeriesSplit for train-crossval-test
     tscv = TimeSeriesSplit(n_splits=N_SPLITS)
 
     # Reserve the last fold for testing
@@ -110,9 +115,8 @@ if __name__ == "__main__":
     optimizer = optim.Adam(model.parameters(), lr=LR)
     
     # train the model
-    directory_logs = os.path.join(LOGS_DIR, datetime.now().strftime("%Y-%m-%d-%H-%M"))
-    create_directory(directory_logs)
-    train(model, train_loader, crossval_loader, criterion, optimizer, num_epochs=NUM_EPOCHS, device=DEVICE, logs_dir=directory_logs)
+    directory_logs = train(model, train_loader, crossval_loader, criterion, optimizer, num_epochs=NUM_EPOCHS, device=DEVICE, logs_dir=LOGS_DIR)
+  
     plot_losses(os.path.join(directory_logs, "loss_history.json"), directory_logs)
 
     pass
