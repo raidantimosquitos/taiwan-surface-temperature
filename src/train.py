@@ -3,8 +3,8 @@ import json
 from datetime import datetime
 import torch
 import torch.optim as optim
-from torch.utils.data import DataLoader
-from sklearn.model_selection import train_test_split
+from torch.utils.data import DataLoader, Subset
+from sklearn.model_selection import TimeSeriesSplit
 from utils import save_model_checkpoint, create_directory, plot_losses, ToTensor
 from models import LSTMModel, GRUModel
 from dataset import TWTemperatureDataset
@@ -76,6 +76,7 @@ if __name__ == "__main__":
     TARGET_COLUMN = "AverageTemperature"
     INPUT_WINDOW = 2
     BATCH_SIZE = 32
+    N_SPLITS = 5
     LR = 1e-3
     NUM_EPOCHS = 10
     DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -87,18 +88,27 @@ if __name__ == "__main__":
     in_size = len(dataset.get_feature_names())
 
     # Split dataset into train-crossval-test
-    train_data, temp_data = train_test_split(dataset, test_size=0.4, random_state=1234)
-    val_data, test_data = train_test_split(temp_data, test_size=0.2, random_state=1234)
+    # TimeSeriesSplit for train-validation-test
+    tscv = TimeSeriesSplit(n_splits=N_SPLITS)
 
-    # Create PyTorch dataloaders
-    train_loader = DataLoader(train_data, batch_size=BATCH_SIZE, shuffle=True)
-    crossval_loader = DataLoader(val_data, batch_size=BATCH_SIZE, shuffle=True)
+    # Reserve the last fold for testing
+    splits = list(tscv.split(dataset))
+    train_indices, cross_val_indices = splits[-2]
+    _, test_indices = splits[-1]
 
-    # Model setup
-    model = LSTMModel(input_dim=in_size, hidden_dim=2*in_size, num_layers=2, output_dim = 1)
-    criterion = torch.nn.MSELoss()
+    train_data = Subset(dataset, train_indices)
+    cross_val_data = Subset(dataset, cross_val_indices)
+    test_data = Subset(dataset, test_indices)
+
+    # Data loaders
+    train_loader = DataLoader(train_data, batch_size=BATCH_SIZE, shuffle=False)  # No shuffle to preserve temporal order
+    crossval_loader = DataLoader(cross_val_data, batch_size=BATCH_SIZE, shuffle=False)
+
+    # Model, criterion, optimizer
+    model = LSTMModel(input_dim=in_size, hidden_dim=2*in_size, num_layers=2, output_dim=1)
+    criterion = torch.nn.MSELoss()  # Using MSE for regression
     optimizer = optim.Adam(model.parameters(), lr=LR)
-
+    
     # train the model
     directory_logs = os.path.join(LOGS_DIR, datetime.now().strftime("%Y-%m-%d-%H-%M"))
     create_directory(directory_logs)
