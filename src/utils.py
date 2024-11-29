@@ -1,8 +1,8 @@
 import os
-import shutil
+import json
 import torch
-import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 class AddLagFeatures:
     def __init__(self, lag: int, target_columns: list):
@@ -21,13 +21,13 @@ class AddLagFeatures:
         return df.dropna()
 
 class ToTensor:
-    """
+    def __call__(self, x, y):
+        """
         Converts data to PyTorch tensors.
         :param x: Input features (NumPy array or DataFrame slice)
         :param y: Target value
         :return: Tuple of tensors
-    """
-    def __call__(self, x, y):
+        """
         x_tensor = torch.tensor(x, dtype=torch.float32)
         y_tensor = torch.tensor([y], dtype=torch.float32)
         return x_tensor, y_tensor
@@ -62,21 +62,34 @@ def load_model_checkpoint(model, filepath):
     """
     model.load_state_dict(torch.load(filepath))
 
-def calculate_accuracy(predictions, targets):
+def plot_losses(json_file_path, output_dir):
     """
-    Calculate the accuracy of model predictions.
-    
-    Parameters:
-    - predictions (torch.Tensor): Model predictions
-    - targets (torch.Tensor): True labels
-    
-    Returns:
-    - float: Accuracy of predictions
+    Reads loss history from a JSON file and generates a plot of training and validation losses.
+
+    Args:
+        json_file_path (str): Path to the JSON file containing loss history.
+        output_dir (str): Directory to save the loss plot.
     """
-    correct = (predictions == targets).sum().item()
-    total = targets.size(0)
-    accuracy = correct / total
-    return accuracy
+    # Load the loss history from the JSON file
+    with open(json_file_path, "r") as f:
+        loss_history = json.load(f)
+
+    # Generate the plot
+    plt.figure(figsize=(10, 6))
+    plt.plot(loss_history["train_loss"], label="Training Loss", marker="o")
+    plt.plot(loss_history["val_loss"], label="Validation Loss", marker="o")
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.title("Training and Validation Loss Over Epochs")
+    plt.legend()
+    plt.grid()
+
+    # Save the plot to the output directory
+    plot_path = os.path.join(output_dir, "loss_plot.png")
+    plt.savefig(plot_path)
+    plt.show()
+
+    print(f"Loss plot saved to {plot_path}")
 
 # Testing the functions
 if __name__ == '__main__':

@@ -6,3 +6,5 @@ datasets/berkeley-earth-surface-temp-datasets/GlobalLandTemperaturesByState.csv
 
 # Ignore the following directories
 datasets/world-cities-coordinates
+src/__pycache__
+__pycache__

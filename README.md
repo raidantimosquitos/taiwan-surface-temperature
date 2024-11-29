@@ -29,7 +29,7 @@ Directory for storing all dataset files. For now Taiwan related only.
 Jupyter notebooks performing Exploratory Data Analysis. It includes a set of figures to help illustrate the dataset, also small transformations applied to the coordinates in the dataset.
 
 ### Source code
-This directory includes the source code to run the program. So far I have completed the PyTorch dataset class of the dataset where I engineered some features, summarized by the following three points:
+This directory (`src`) includes the source code to run the program. So far I have completed the PyTorch dataset class of the dataset where I engineered some features, summarized by the following three points:
 1. Normalized `AverageTemperature` and `AverageTemperatureUncertainty` features so they are distributed in the [0,1] interval.
 2. One-hot encoded `City` feature and dropped `Country` feature.
 3. Added Lag features to exploit temporal relationship. These can be used as a hyper-parameter introducing the amount of lag features required. *What are Lag features?*

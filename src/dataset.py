@@ -46,21 +46,36 @@ class TWTemperatureDataset(Dataset):
             x, y = transform(x, y)
 
         return x, y
+    
+    def get_feature_names(self):
+        """
+        Returns the names of the features used as input.
+        """
+        # Exclude the target column from feature names
+        return [col for col in self.data.columns if col != self.target_column]
 
 # Testing the functionality
 if __name__ == '__main__':
-    # Define constants
+    # Define constant
     FILEPATH = "/home/lucash/NTUST_GIMT/2024_Fall_Semester/Machine_Learning/taiwan-surface-temperature/datasets/berkeley-earth-surface-temp-dataset/TaiwanLandTemperaturesByCity.csv"
     TARGET_COLUMN = "AverageTemperature"
     INPUT_WINDOW = 2
+    BATCH_SIZE = 32
 
     # Create the dataset
     dataset = TWTemperatureDataset(filepath=FILEPATH, target_column=TARGET_COLUMN, input_window=INPUT_WINDOW, transforms=[ToTensor()])
 
     # Test the dataset
+    print("New Input features: ", dataset.get_feature_names())
     print("\nExample Data Point:")
     x, y = dataset[0]
     print("Input (x):", x)
     print("Target (y):", y)
 
+    dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
+    for batch_x, batch_y in dataloader:
+        print("Batch Input Shape:", batch_x.shape)
+        print("Batch Target Shape:", batch_y.shape)
+        break
+    
     pass
