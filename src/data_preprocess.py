@@ -30,8 +30,9 @@ def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+# Testing the code
 if __name__ == "__main__":
-     # Define constants
+    # Define the constant
     FILEPATH = "/home/lucash/NTUST_GIMT/2024_Fall_Semester/Machine_Learning/taiwan-surface-temperature/datasets/berkeley-earth-surface-temp-dataset/TaiwanLandTemperaturesByCity.csv"
 
     # Load the dataframe
