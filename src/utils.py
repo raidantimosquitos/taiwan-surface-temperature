@@ -6,20 +6,35 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 class AddLagFeatures:
-    def __init__(self, lag: int, target_columns: list):
+    def __init__(self, lag: int, target_columns: list, city_columns: str):
         """
         Add lag features for specific target columns.
         :param lag: Number of lags to generate
         :param target_columns: List of column names to apply lag features
+        :param city_columns: Column name to group by (e.g., City)
         """
         self.lag = lag
         self.target_columns = target_columns
+        self.city_columns = city_columns
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Transform the dataframe by adding lag features grouped by the specified column.
+        :param df: Input dataframe
+        :return: Dataframe with lag features added
+        """
+        # Create a group identifier based on one-hot encoded city columns
+        df['Group'] = df[self.city_columns].idxmax(axis=1)  # Identify the city column with value 1
+
+        # Add lag features for each target column
         for col in self.target_columns:
             for i in range(1, self.lag + 1):
-                df[f"{col}_lag_{i}"] = df[col].shift(i)
-        return df.dropna()
+                df[f"{col}_lag_{i}"] = df.groupby('Group')[col].shift(i)
+
+        # Drop the temporary group column and rows with NaN values introduced by lagging
+        df = df.drop(columns=['Group']).dropna()
+        
+        return df
 
 class ToTensor:
     def __call__(self, x, y):

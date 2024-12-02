@@ -19,8 +19,11 @@ class TWTemperatureDataset(Dataset):
         df.set_index("dt", inplace=True)
         df = preprocess_data(df)
 
+        ohe_cities = [*df]
+        ohe_cities = [k for k in ohe_cities if 'City' in k]
+
         # Apply lag features
-        lag_transform = AddLagFeatures(input_window, target_columns=["AverageTemperature", "AverageTemperatureUncertainty"])
+        lag_transform = AddLagFeatures(input_window, target_columns=["AverageTemperature", "AverageTemperatureUncertainty"], city_columns=ohe_cities)
         df = lag_transform.transform(df)
 
         # Store data and configuration
