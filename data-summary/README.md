@@ -178,5 +178,50 @@ Given Taiwan’s location in East Asia, these anomalies are often influenced by 
 <img src="img/average-anomalies-by-season.png" width="1000" align="center">
 
 
+### Climate Types
+
+I have also started to explore the climate types as a new feature engineered for the dataset. I use spatial inference from the coordinate maps from Koppen-Geiger maps focalized on the Taiwan area, which classifies different areas of Taiwan according to their climate type.
+
+<img src="data-summary/img/Koppen-Geiger_Map_TWN_present.png" width="1000" align="center">
+
+Beck, H.E., Zimmermann, N. E., McVicar, T. R., Vergopolan, N., Berg, A., & Wood, E. F.: *Present and future Köppen-Geiger climate classification maps at 1-km resolution* Nature Scientific Data. DOI:[10.1038/sdata.2018.214](https://doi.org/10.1038/sdata.2018.214)
+
+According to the analysis, within the 30 cities of our dataset, we have 4 different climate types only (Cfa, Cwa, Am and Aw). You can see the following summary:
+
+```bash
+Zhongzhe: Cfa - Temperate, no dry season, hot summer
+Zhubei: Cfa - Temperate, no dry season, hot summer
+Fongshan: Aw - Tropical, savannah
+Xizhi: Cfa - Temperate, no dry season, hot summer
+Hsinchu: Cfa - Temperate, no dry season, hot summer
+Xindian: Cfa - Temperate, no dry season, hot summer
+Kaohsiung: Aw - Tropical, savannah
+Keelung: Cfa - Temperate, no dry season, hot summer
+Luzhou: Cfa - Temperate, no dry season, hot summer
+Nantou: Cwa - Temperate, dry winter, hot summer
+Banqiao: Cfa - Temperate, no dry season, hot summer
+Bade: Cfa - Temperate, no dry season, hot summer
+Pingzhen: Cfa - Temperate, no dry season, hot summer
+Pingtung: Am - Tropical, monsoon
+Sanchong: Cfa - Temperate, no dry season, hot summer
+Sanxia: Cfa - Temperate, no dry season, hot summer
+Shuilin: Cwa - Temperate, dry winter, hot summer
+Taichung: Cwa - Temperate, dry winter, hot summer
+Tainan: Aw - Tropical, savannah
+Taipei: Cfa - Temperate, no dry season, hot summer
+Taitung: Am - Tropical, monsoon
+Dali: Cwa - Temperate, dry winter, hot summer
+Tamsui: Cfa - Temperate, no dry season, hot summer
+Taoyuan: Cfa - Temperate, no dry season, hot summer
+Douliu: Cwa - Temperate, dry winter, hot summer
+Toucheng: Cfa - Temperate, no dry season, hot summer
+Yuanlin: Cwa - Temperate, dry winter, hot summer
+Yangmei: Cfa - Temperate, no dry season, hot summer
+Yonghe: Cfa - Temperate, no dry season, hot summer
+Yongkang: Aw - Tropical, savannah
+```
+
+I might include this ones as well for training our model, though it is still not implemented.
+
 ## Conclusions
 All in all, I think we could also make use of some of these new features (seasons and temperature anomalies) to enhance our models. You can take a look at the code if you have time, now we need to focus on handling Nulls and encoding the categorical features.

@@ -78,37 +78,42 @@ The loss function chosen to train has been MSE Loss, and Adam optimizer. The mod
 Here is a sample of the training command line output:
 ```bash
 Training with cuda device.
-Epoch [1/10]: Training Loss: 0.0526; Validation Loss: 0.0106
-New best model found! Validation Loss: 0.0106
-Epoch [2/10]: Training Loss: 0.0085; Validation Loss: 0.0055
-New best model found! Validation Loss: 0.0055
-Epoch [3/10]: Training Loss: 0.0068; Validation Loss: 0.0051
-New best model found! Validation Loss: 0.0051
-Epoch [4/10]: Training Loss: 0.0065; Validation Loss: 0.0049
-New best model found! Validation Loss: 0.0049
-Epoch [5/10]: Training Loss: 0.0063; Validation Loss: 0.0052
-Epoch [6/10]: Training Loss: 0.0061; Validation Loss: 0.0049
-Epoch [7/10]: Training Loss: 0.0060; Validation Loss: 0.0050
-Epoch [8/10]: Training Loss: 0.0058; Validation Loss: 0.0047
-New best model found! Validation Loss: 0.0047
-Epoch [9/10]: Training Loss: 0.0057; Validation Loss: 0.0055
-Epoch [10/10]: Training Loss: 0.0056; Validation Loss: 0.0049
-Loss history saved to /home/lucash/NTUST_GIMT/2024_Fall_Semester/Machine_Learning/taiwan-surface-temperature/logs/2024-11-29-13-56/loss_history.json
-Training complete. Best Validation Loss: 0.0047
+Epoch [1/10]: Training Loss: 0.0638; Validation Loss: 0.0573
+New best model found! Validation Loss: 0.0573
+Epoch [2/10]: Training Loss: 0.0497; Validation Loss: 0.0327
+New best model found! Validation Loss: 0.0327
+Epoch [3/10]: Training Loss: 0.0358; Validation Loss: 0.0288
+New best model found! Validation Loss: 0.0288
+Epoch [4/10]: Training Loss: 0.0319; Validation Loss: 0.0265
+New best model found! Validation Loss: 0.0265
+Epoch [5/10]: Training Loss: 0.0290; Validation Loss: 0.0232
+New best model found! Validation Loss: 0.0232
+Epoch [6/10]: Training Loss: 0.0259; Validation Loss: 0.0192
+New best model found! Validation Loss: 0.0192
+Epoch [7/10]: Training Loss: 0.0223; Validation Loss: 0.0149
+New best model found! Validation Loss: 0.0149
+Epoch [8/10]: Training Loss: 0.0181; Validation Loss: 0.0124
+New best model found! Validation Loss: 0.0124
+Epoch [9/10]: Training Loss: 0.0149; Validation Loss: 0.0107
+New best model found! Validation Loss: 0.0107
+Epoch [10/10]: Training Loss: 0.0132; Validation Loss: 0.0102
+New best model found! Validation Loss: 0.0102
+Loss history saved to /home/lucash/NTUST_GIMT/2024_Fall_Semester/Machine_Learning/taiwan-surface-temperature/logs/2024-12-02-15-04/loss_history.json
+Training complete. Best Validation Loss: 0.0102
 ```
 
-<img src="logs/2024-11-29-13-56/loss_plot.png" width="600" align="center">
+<img src="logs/2024-12-02-15-04/loss_plot.png" width="600" align="center">
 
 #### Test or evaluation
 For test so far I have only coded a class that can compute MSE Loss. It does so, as earlier explained, on the latter 20% of the dataset. It loads the model that achieved the lowest cross-validation score during the training loop, it computes the temperature predictions of that best model and compares it to the ground truth values on the dataset. With both predictions and ground truth, the MSE Loss is computed to give us an indicator of the performance of the trained model and a plot showing ground truth and prediction of temperature is generated and saved on the `logs` folder. There is samples of the execution in below code snippet, also the figure is shown (*Possible `TODO`: implement more evaluation metrics rather than just MSE Loss*).
 ```bash
 Model loaded from /home/lucash/NTUST_GIMT/2024_Fall_Semester/Machine_Learning/taiwan-surface-temperature/checkpoints/best_model.pth
 Evaluating with cuda device.
-Evaluation Complete. MSE Loss: 0.0044
-Plot saved to /home/lucash/NTUST_GIMT/2024_Fall_Semester/Machine_Learning/taiwan-surface-temperature/logs/2024-11-29-13-56/predictions_vs_ground_truth.png
+Evaluation Complete. MSE Loss: 0.0100
+Plot saved to /home/lucash/NTUST_GIMT/2024_Fall_Semester/Machine_Learning/taiwan-surface-temperature/logs/2024-12-02-15-04/predictions_vs_ground_truth.png
 ```
 
-<img src="logs/2024-11-29-13-56/predictions_vs_ground_truth.png" width="600" align="center">
+<img src="logs/2024-12-02-15-04/predictions_vs_ground_truth.png" width="600" align="center">
 
 *Again please note that the AverageTemperature target is normalized here, thus you do not see the expected ranges of temperature, this I can also change for presentation purposes later on.*
 
