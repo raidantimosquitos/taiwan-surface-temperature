@@ -182,7 +182,7 @@ Given Taiwan’s location in East Asia, these anomalies are often influenced by 
 
 I have also started to explore the climate types as a new feature engineered for the dataset. I use spatial inference from the coordinate maps from Koppen-Geiger maps focalized on the Taiwan area, which classifies different areas of Taiwan according to their climate type.
 
-<img src="data-summary/img/Koppen-Geiger_Map_TWN_present.png" width="1000" align="center">
+<img src="img/Koppen-Geiger_Map_TWN_present.png" width="1000" align="center">
 
 Beck, H.E., Zimmermann, N. E., McVicar, T. R., Vergopolan, N., Berg, A., & Wood, E. F.: *Present and future Köppen-Geiger climate classification maps at 1-km resolution* Nature Scientific Data. DOI:[10.1038/sdata.2018.214](https://doi.org/10.1038/sdata.2018.214)
 
