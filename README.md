@@ -1,25 +1,42 @@
 # Study of Taiwan Land Surface Temperature
 
-**UPDATE:** *Due to lack of storage space on Git Large File Storage (LFS) I will have to remove the original datasets from the repository. It topped up the amount of free space to use, I will just keep the Taiwan related datasets. You are welcome to check the transformations applied to the dataset on the data-summary folder.*
+This project predicts the **average temperature** for various cities in Taiwan based on their geographic location (latitude and longitude), the time of year (year and month), and the city name. The model is trained using XGBoost, a powerful gradient boosting algorithm, and the predictions are made using a trained model.
 
-After the meeting on 10th Nov., we have decided to focus our effort on working only with the Berkeley's Earth Surface Temperature dataset (instead of using also Air Quality Index). Our plan is to build various models to perform regression tasks. The target of the models being average temperature and the input features being the rest of the fields in the dataset (datetime, city, latitude and longitude).
+## Why XGBoost for Temperature Prediction?
 
-Some of the possible models that can be explored are:
-- Linear regression.
-- Random Forest.
-- Polynomial regression.
-- Gradient boosting model (as explained by professor on the last class).
-- Adaboost model.
+XGBoost (Extreme Gradient Boosting) is a highly efficient and flexible gradient boosting algorithm that excels in supervised learning tasks. It is based on decision trees and builds models through an iterative process where each new tree corrects the errors of the previous trees. XGBoost uses a technique called boosting, which allows it to combine the outputs of multiple weak learners (decision trees) to form a strong and accurate predictive model:
 
-You can also add your models or other scopes if you have.
+1. **Effective for Tabular Data**: XGBoost excels in handling structured, tabular data, making it an ideal choice for this dataset, which contains both numerical (latitude, longitude, year, month) and categorical (city) features.
 
-As pointed out by Minh there is work to do in the following areas:
-- Handling missing values (Nulls).
-- Categorical encoding for features such as City.
-- Handling outliers (setting up thresholds on the features to not train with outlier data)
+2. **Captures Complex Relationships**: Temperature prediction involves complex, nonlinear relationships between geographic and temporal variables. XGBoost's gradient boosting framework can effectively capture these interactions and dependencies, ensuring accurate predictions.
 
-What would be nice to do if we have time is also develop some time series forecasting model. To do this we might need more data samples, but we can always use data up-sampling methods to interpolate more samples and increase our dataset size. 
+3. **Robustness to Overfitting**: With built-in regularization (L1 and L2), XGBoost controls overfitting, which is crucial for preventing the model from learning noise from the data and ensuring good generalization to unseen cities and time periods.
 
-## Repostory structure
+4. **Efficient Handling of Missing Data**: XGBoost handles missing values natively, eliminating the need for extensive data imputation, which is particularly helpful when dealing with real-world datasets that may have incomplete records.
 
-For now I will move all Data summary to a new directory data-summary, you can refer to that directory if you have doubts about the dataset. 
+5. **Scalability and Speed**: XGBoost is optimized for speed and memory efficiency, enabling it to handle larger datasets and make predictions quickly without significant performance loss. This makes it ideal for efficiently processing large geographical and temporal datasets.
+
+## Files Overview
+
+### 1. **train.py**
+
+The `train.py` script is used to train an XGBoost model on the dataset, which includes information such as the city name, geographic coordinates, and time. The steps followed in this script are:
+- Data preprocessing (handling missing values and encoding categorical data)
+- Training the XGBoost model
+- Evaluating model performance using Root Mean Squared Error (RMSE)
+- Saving the trained model for later use
+
+### 2. **predict.py**
+
+The `predict.py` script allows the user to input data about a city (name, latitude, longitude, year, and month) and uses the saved XGBoost model to predict the average temperature for that city at the specified time. It includes:
+- A user input prompt for entering data
+- A temperature prediction function using the trained XGBoost model
+- Display of the predicted temperature for the given input
+
+## Requirements
+
+- Python 3.x
+- XGBoost
+- NumPy
+- Pandas
+- scikit-learn
