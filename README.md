@@ -1,24 +1,61 @@
 # Study of Taiwan Land Surface Temperature
 
-**UPDATE:** *Due to lack of storage space on Git Large File Storage (LFS) I will have to remove the original datasets from the repository. It topped up the amount of free space to use, I will just keep the Taiwan related datasets. You are welcome to check the transformations applied to the dataset on the data-summary folder.*
+The final approach to the study is all contained in `data-summary-2.ipynb` notebook, which generates a `.csv` file containing the final dataset, this can be used to feed the models. The feature engenieering of the dataset is introduced below:
 
-After the meeting on 10th Nov., we have decided to focus our effort on working only with the Berkeley's Earth Surface Temperature dataset (instead of using also Air Quality Index). Our plan is to build various models to perform regression tasks. The target of the models being average temperature and the input features being the rest of the fields in the dataset (datetime, city, latitude and longitude).
+#### Starting dataset study (from Kaggle file)
+The dataset has monthly frequency temperature records for cities all over the world. A description of the `Country = Taiwan` dataset is presented below:
+- **Dataset shape**: No. of Samples: `62190` - No. of Features: `7`.
+- **Features**: `[dt, AverageTemperature, AverageTemperatureUncertainty, City, Country, Latitude, Longitude]`
+- **City samples**: 2073 samples per city. 30 cities in total. 
+- **NULL values**: 84 empty records in `AverageTemperature` and `AverageTemperatureUncertainty` out of `62190` samples
+- **Feature description**: statistical description of `AverageTemperature` and `AverageTemperatureUncertainty` features.
+```bash
+                                 count       mean       std     min     25%  \
+AverageTemperature             62106.0  21.682917  4.634189  10.475  17.558   
+AverageTemperatureUncertainty  62106.0   0.678325  0.619105   0.060   0.244   
 
-Some of the possible models that can be explored are:
-- Linear regression.
-- Random Forest.
-- Polynomial regression.
-- Gradient boosting model (as explained by professor on the last class).
-- Adaboost model.
+                                  50%     75%     max  
+AverageTemperature             22.262  25.955  29.815  
+AverageTemperatureUncertainty   0.363   1.065   4.755
+```
 
-You can also add your models or other scopes if you have.
+#### Feature Engineering
+1. Groupping cities by coordinates and temperature records, when exploring the dataset we found out that some cities had duplicate coordinates and temperature records. You can see a summary below:
+  1. **North-West CityGroup**: Chungho, Chupei, Hsinchu, Luchou, Pate, Pingchen, Sanchung, Sanhsia, Shulin, Taichung, Tali, Tanshui, Taoyüan, Tucheng, Yüanlin, Yangmei
+  2. **North-East CityGroup**: Hsichih, Hsintien, Keelung, Panchiao, Taipei, Yungho
+  3. **South-West CityGroup**: Fengshan, Kaohsiung, Pingtung, Tainan, Touliu
+  4. **South-East CityGroup**: Nantou, Taitung, Yungkang
+2. Dropping duplicates, new dataset shape ``.
+3. Generate a new feature `season` based on the months of the year where Dec-Feb is `Winter`, Mar-May is `Spring`, Jun-Aug is `Summer` and Sep-Nov is `Fall`.
+4. Generate a new feature `Anomaly`: 
+   1. We compute the average temperature with all samples in the dataset for each of the seasons defined in the step above.
+   2. For every sample, the difference between the season average temperature and that sample temperature.
+   3. This is the `Anomaly` feature, it illustrates how far is a month's temperature from the average of that season.
+5. Generate a `climate_type` feature, which maps the `Latitude` and `Longitude` to a Koppen-Geiger map of Taiwan which assigns its pixels/coordinates to a certain types of climate. These are the climate types:
+<img src="data-summary/img/Koppen-Geiger_Map_TWN_present.png" width="600" align="center">
+6. Filling in NULL values by the median of that feature.
+7. Handling outliers:
+   1. Spotting outliers with the 1.5 IQR rule.
+   2. Substituting outliers by the median of that feature.
+8. Generate a Lag feature `AverageTemperatureVsLastMonth`: the difference between the current AverageTemperature sample and last month's.
+9.  Set the `dt` (datetime) feature as the index.
 
-As pointed out by Minh there is work to do in the following areas:
-- Handling missing values (Nulls).
-- Categorical encoding for features such as City.
-- Handling outliers (setting up thresholds on the features to not train with outlier data)
+Up to here, these are the details of the dataset:
+- **Dataset shape**: No. of Samples: `8292` - No. of Features: `12`.
+- **Features**: `[AverageTemperature, AverageTemperatureUncertainty, Country, Latitude, Longitude, CityGroup, Year, Month, season, Anomaly, climate_type,  AverageTemperatureChangeVsLastMonth]`.
 
-What would be nice to do if we have time is also develop some time series forecasting model. To do this we might need more data samples, but we can always use data up-sampling methods to interpolate more samples and increase our dataset size. 
+#### Encoding the features
+Before feeding the dataset to the model we encode part of the features, the process is explained below:
+1. Cyclic encoding for month feature, we represent the month feature as a function of sine and cosine, to enhance the recurrency of it.
+   1. Month_sine: $\sin{(2\pi\cdot\frac{month - 1}{12})}$
+   2. Month_cosine: $\cos{(2\pi\cdot\frac{month - 1}{12})}$
+2. Sinosoidal encoding for latitude and longitude to enhance their spatial relations.
+3. One-hot encoding to all categorical data (`CityGroup`, `Season` and `climate_type`).
+
+#### Last touches
+Drop the country column and sort the dataframe in ascending order. This is the description of the dataset:
+- **Dataset shape**: No. of Samples: `8292` - No. of Features: `20`.
+- **Features**: `[AverageTemperature, AverageTemperatureUncertainty, lat_sin, lat_cos, long_sin, long_cos, Year, month_sin, month_cos, season_Spring, season_Summer, season_Winter, season_Fall, Anomaly, climate_type_Ac,  AverageTemperatureChangeVsLastMonth, CityGroup_NorthEast, CityGroup_NorthWest, CityGroup_SouthEast, CityGroup_SouthWest]`.
 
 ## Repostory structure
 ### Datasets
