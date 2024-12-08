@@ -1,22 +1,19 @@
 import os
 
 import torch
-from torch.utils.data import DataLoader, Subset
-from sklearn.model_selection import TimeSeriesSplit
+from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
+import matplotlib.ticker as ticker
+import numpy as np
+import pandas as pd
 
-from src.models import LSTMModel
-from src.dataset import TWTemperatureDataset
-from src.utils import ToTensor
-
-class ModelEvaluation:
+class ForecastFutureValues:
     """
     Class for evaluating a trained model on a given dataset.
     """
     def __init__(self, model, checkpoint_path, device='cpu'):
         """
-        Initialize the ModelEvaluation object.
+        Initialize the ForecastFutureValues object.
 
         Args:
             model (nn.Module): The trained PyTorch model to be evaluated.
@@ -51,7 +48,8 @@ class ModelEvaluation:
         print(f'Evaluating with {self.device} device.')
 
         criterion = torch.nn.MSELoss()
-        mse_loss = 0.0
+        rmse_loss = 0.0
+        r2 = 0.0
         predictions, targets = [], []
 
         with torch.no_grad():
@@ -65,97 +63,54 @@ class ModelEvaluation:
                 predictions.append(outputs.cpu())
                 targets.append(labels.cpu())
 
-                # Compute loss
-                mse_loss += criterion(outputs, labels).item()
+                # Compute loss and R2 score
+                rmse_loss += np.sqrt(criterion(outputs.cpu(), labels.cpu()).item())
+                r2 += r2_score(outputs.cpu(), labels.cpu())
 
-        mse_loss /= len(test_loader)
+        rmse_loss /= len(test_loader)
+        r2 /= len(test_loader)
 
-        # Convert to tensors
+        # Convert to numpy array
         predictions = torch.cat(predictions, dim=0).numpy()
         targets = torch.cat(targets, dim=0).numpy()
 
-        print(f"Evaluation Complete. MSE Loss: {mse_loss:.4f}")
+        print(f"Evaluation Complete. RMSE Loss: {rmse_loss:.4f}, R^2 score: {r2:.4f}")
 
-        return {"mse": mse_loss, "predictions": predictions, "targets": targets, "dates": test_dates}
+        return {"rmse": rmse_loss, "r2_score": r2, "predictions": predictions, "targets": targets, "dates": test_dates}
 
-    def plot_results(self, predictions, targets, dates, save_path=None):
+    def forecast(self, test_data, test_dates, num_forecast_steps=12):
         """
-        Plot predictions vs. ground truth with datetime on x-axis.
+        Forecast future values using the trained model.
 
         Args:
-            predictions (numpy.ndarray): Predicted values from the model.
-            targets (numpy.ndarray): Ground truth values.
-            dates (list): List of datetime objects for the x-axis.
-            save_path (str, optional): Path to save the plot. If None, the plot is shown.
+            test_data (TensorDataset): The test dataset (features and targets).
+            test_dates (list): List of date strings corresponding to the test data.
+            num_forecast_steps (int): Number of steps to forecast.
+
+        Returns:
+            dict: Forecasted values and corresponding future dates (as strings).
         """
-        plt.figure(figsize=(10, 6))
-        plt.plot(dates, targets, label='Ground Truth', color='blue')
-        plt.plot(dates, predictions, label='Predictions', color='orange', alpha=0.7)
+        print("Forecasting future values...")
 
-        plt.title('Model Predictions vs Ground Truth')
-        plt.xlabel('Date')
-        plt.ylabel('Temperature')
-        plt.xticks(rotation=45)
+        # Extract the last sequence from test data
+        sequence_to_forecast = test_data.tensors[0][-1].cpu().numpy()  # Last sequence in test data
+        forecasted_values = []
 
-        # Format x-axis to show dates properly
-        # Format the x-axis to display only years (or customize as needed)
-        plt.gca().xaxis.set_major_locator(mdates.YearLocator())  # Show every year
-        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y'))  # Format as Year (YYYY)
+        with torch.no_grad():
+            for step in range(num_forecast_steps):
+                # Prepare the input sequence tensor
+                sequence_tensor = torch.as_tensor(sequence_to_forecast).unsqueeze(0).float().to(self.device)
+                predicted_value = self.model(sequence_tensor).cpu().numpy()[0, 0]
 
-        plt.legend()
-        plt.grid(True)
+                forecasted_values.append(predicted_value)
 
-        if save_path:
-            plt.savefig(save_path)
-            print(f"Plot saved to {save_path}")
-        else:
-            plt.show()
+                # Update sequence: Shift features and add prediction as the new target
+                sequence_to_forecast = np.roll(sequence_to_forecast, shift=-1, axis=0)
+                sequence_to_forecast[-1, -1] = predicted_value  # Update the target value
 
-# Main evaluation script
-if __name__ == "__main__":
-    # Paths and constants
-    FILEPATH = "/home/lucash/NTUST_GIMT/2024_Fall_Semester/Machine_Learning/taiwan-surface-temperature/datasets/berkeley-earth-surface-temp-dataset/TaiwanLandTemperaturesByCity.csv"
-    CHECKPOINTS_DIR = "/home/lucash/NTUST_GIMT/2024_Fall_Semester/Machine_Learning/taiwan-surface-temperature/checkpoints"
-    BEST_MODEL_PATH = os.path.join(CHECKPOINTS_DIR, "best_model.pth")
-    TARGET_COLUMN = "AverageTemperature"
-    INPUT_WINDOW = 2
-    N_SPLITS = 5
-    BATCH_SIZE = 32
-    DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+        forecasted_values = (forecasted_values - np.mean(forecasted_values))/np.std(forecasted_values)
+        # Generate future dates
+        last_date = test_dates[-1]
+        future_dates = [last_date + pd.DateOffset(months=i) for i in range(1, num_forecast_steps + 1)]
 
-    # Load dataset and create test DataLoader
-    dataset = TWTemperatureDataset(
-        filepath=FILEPATH,
-        target_column=TARGET_COLUMN,
-        input_window=INPUT_WINDOW,
-        transforms=[ToTensor()]
-    )
-    in_size = len(dataset.get_feature_names())
-
-    # TimeSeriesSplit for train-crossval-test
-    tscv = TimeSeriesSplit(n_splits=N_SPLITS)
-
-    # Reserve the last fold for testing
-    splits = list(tscv.split(dataset))
-    _, test_indices = splits[-1]
-
-    test_data = Subset(dataset, test_indices)
-
-    # Data loaders
-    test_loader = DataLoader(test_data, batch_size=BATCH_SIZE, shuffle=False)  # No shuffle to preserve temporal order
-    dates = dataset.get_dates()
-    test_dates = [dates[x] for x in test_indices]
-
-    # Initialize and evaluate the model
-    model = LSTMModel(input_dim= in_size, hidden_dim=2*in_size, num_layers=2, output_dim=1)
-    evaluator = ModelEvaluation(model=model, checkpoint_path=BEST_MODEL_PATH, device=DEVICE)
-    evaluation_results = evaluator.evaluate(test_loader, test_dates)
-
-    # Plot results
-    plot_path = os.path.join(CHECKPOINTS_DIR, "predictions_vs_ground_truth.png")
-    evaluator.plot_results(
-        predictions=evaluation_results["predictions"],
-        targets=evaluation_results["targets"],
-        dates=evaluation_results["dates"],
-        save_path=plot_path
-    )
+        return {"forecasted_values": forecasted_values, "future_dates": future_dates}

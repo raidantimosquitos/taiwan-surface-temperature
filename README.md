@@ -33,6 +33,7 @@ AverageTemperatureUncertainty   0.363   1.065   4.755
    3. This is the `Anomaly` feature, it illustrates how far is a month's temperature from the average of that season.
 5. Generate a `climate_type` feature, which maps the `Latitude` and `Longitude` to a Koppen-Geiger map of Taiwan which assigns its pixels/coordinates to a certain types of climate. These are the climate types:
 <img src="data-summary/img/Koppen-Geiger_Map_TWN_present.png" width="600" align="center">
+
 6. Filling in NULL values by the median of that feature.
 7. Handling outliers:
    1. Spotting outliers with the 1.5 IQR rule.
@@ -69,96 +70,51 @@ This directory (`src`) includes the source code to run the program. It consists 
 
 #### TWTemperatureDataset Class
 
-This class is a PyTorch dataset class of the dataset where I engineered some features, summarized by the following three points:
-1. Normalized `AverageTemperature` and `AverageTemperatureUncertainty` features so they are distributed in the [0,1] interval.
-2. One-hot encoded `City` feature and dropped `Country` feature, since it was only Taiwan.
-3. Added Lag features to exploit temporal relationship. These can be used as a hyper-parameter introducing the amount of lag features required. *What are Lag features?*
-  - Lag features represent past observations to provide temporal context. For example:
-    - If the `AverageTemperature` column contains monthly temperatures.
-      - `AverageTemperature_lag1` contains temperature from the previous month.
-      - `AverageTemperature_lag2` contains temperature from two months ago.
-      - *for the first records there is no previous temperature, so fills the feature with N/A, thus I drop N/A after generating Lag features*.
-
-Here is an example of the newly engineered dataset to input our model (in this case introducing two extra lag features for AverageTemperature and AverageTemperatureUncertainty respectively). In total we have 37 input features, and the target is AverageTemperature:
-```bash
-New Input features:  ['AverageTemperatureUncertainty', 'Latitude', 'Longitude', 'City_Bade', 'City_Banqiao', 'City_Dali', 'City_Douliu', 'City_Fongshan', 'City_Hsinchu', 'City_Kaohsiung', 'City_Keelung', 'City_Luzhou', 'City_Nantou', 'City_Pingtung', 'City_Pingzhen', 'City_Sanchong', 'City_Sanxia', 'City_Shuilin', 'City_Taichung', 'City_Tainan', 'City_Taipei', 'City_Taitung', 'City_Tamsui', 'City_Taoyuan', 'City_Toucheng', 'City_Xindian', 'City_Xizhi', 'City_Yangmei', 'City_Yonghe', 'City_Yongkang', 'City_Yuanlin', 'City_Zhongzhe', 'City_Zhubei', 'AverageTemperature_lag_1', 'AverageTemperature_lag_2', 'AverageTemperatureUncertainty_lag_1', 'AverageTemperatureUncertainty_lag_2']
-Example Data Point:
-Date of input (index):  1841-01-01 00:00:00
-Input (x): tensor([[  0.5154,  25.0632, 121.6391,   0.0000,   0.0000,   0.0000,   0.0000,
-           0.0000,   0.0000,   0.0000,   0.0000,   0.0000,   0.0000,   0.0000,
-           0.0000,   0.0000,   0.0000,   0.0000,   0.0000,   0.0000,   0.0000,
-           0.0000,   0.0000,   0.0000,   0.0000,   0.0000,   1.0000,   0.0000,
-           0.0000,   0.0000,   0.0000,   0.0000,   0.0000,   0.2601,   0.1361,
-           0.5118,   0.5237],
-        [  0.5237,  24.9439, 121.2161,   0.0000,   0.0000,   0.0000,   0.0000,
-           0.0000,   0.0000,   0.0000,   0.0000,   0.0000,   0.0000,   0.0000,
-           1.0000,   0.0000,   0.0000,   0.0000,   0.0000,   0.0000,   0.0000,
-           0.0000,   0.0000,   0.0000,   0.0000,   0.0000,   0.0000,   0.0000,
-           0.0000,   0.0000,   0.0000,   0.0000,   0.0000,   0.2543,   0.2601,
-           0.5154,   0.5118]])
-Target (y): tensor([0.1361])
-```
-
-*You might think why not normalize or standardize `longitude` and `latitude` features, well it is not recommended because of the following reasons:*
-- Small Range of Values: Since all `longitude` and `latitude` values for Taiwan fall within a narrow range, they are comparable in magnitude. This minimizes the risk of large-scale differences affecting the model training.
-- Spatial Interpretability: Geographical features like latitude and longitude can have inherent spatial relationships that models, especially neural networks, can learn better when left in their original scale. Altering these values with normalization or standardization may obscure these relationships.
-- Normalization’s Purpose: The purpose of normalization or standardization is typically to ensure features are on the same scale to avoid one dominating the model's optimization process. Here, this isn’t an issue since latitude and longitude values already have similar scales to each other and to other features
+Pytorch dataset class, returns the dataset as a tuple of lists of PyTorch tensor objects (first element of the tuple is the input features and the second element is the target). The class contains the following methods:
+- `get_feature_names()`: Returns a list with the feature names.
+- `get_dates()`: Returns a list of the dates of each sample (indexes of the dataset).
+- `get_CityGroup()`: Returns a new Pytorch dataset class but this time records filtered only on one of the four `CityGroup` values. Features that remain constant in this case are removed (`longitude`, `latitude` and of course `CityGroup`).
 
 #### Models
-I have defined two models so far (LSTM and GRU), though I only have trained with LSTM. My idea is to generate a loop in the `main.py` file to go through the two models (maybe even a third one - e.g. SARIMA) to check which has the best performance.
+I have defined two models so far (LSTM and GRU), though I only have trained with LSTM. 
 
-#### Train
+#### Training loop
+The model is trained according to hyperparameters defined in `config.py` file. The `train()` function takes multiple parameters as input and its working is explained below:
+1. Loop through the train dataset in batches of size `BATCH_SIZE`, feed the data to the model, compare to the ground truth data computing the loss, udpate the model weights and repeat iteratively for all dataset batches.
+2. After all the batches have been fed, we validate the model with the cross_validation dataset, using the same loss function.
+3. The epoch that presents the best validation loss is saved in the `checkpoints` directory for later use.
+
+#### Main program
+The program first trains and tests the whole dataset (with the four `CityGroup`). The training loss plot is generated and stored in the `logs` folder.
+
+When the above is completed, we set up a loop to go through each of the four `CityGroup`, four new models are trained for each of the `CityGroup`, we still are suffering from overfitting, it all points at the small size of the dataset. Each model is tested and forecasts for the next 12 months are computed.
+
+At last a summary table of the test metrics is shown on screen.
+```bash
+Summary of the metrics: 
+| Model      |   RMSE Loss |   R^2 Score |
+|------------+-------------+-------------|
+| Taiwan     |    0.310206 |    0.863688 |
+| North-East |    0.236149 |    0.938089 |
+| North-West |    0.196719 |    0.958322 |
+| South-East |    0.276329 |    0.920766 |
+| South-West |    0.236984 |    0.936852 |
+```
 The split I have used for the whole training is [TimeSeriesSplit](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html) from sklearn, it is important not to shuffle the data in this case to preserve the temporal structure. The proportion is the first 60% of the samples (approx. from 1841 to 1950) is used as train data, the next 20% of the samples is used for cross-validation during the training loop, and the latter 20% of the samples (approx. from 1984 to 2013) is used for the testing phase.
+
+
 
 The loss function chosen to train has been MSE Loss, and Adam optimizer. The model has so far been trained for 10 epochs only, you can check all the hyperparameters in the `config.py` file. The data is feeded to the model in batches of 32 samples, after each batch, the model is validated on the cross-validation part of the dataset with the MSE Loss function (same as in training). The average training and cross-validation loss is computed after all batches of data have been feeded through the model and printed on screen. All the training records are saved in the `logs` directory, as well as the loss plot. The model with the best cross-validation loss is saved in the `checkpoints` directory, so it can be later retrieved for testing.
 
-Here is a sample of the training command line output:
-```bash
-Training with cuda device.
-Epoch [1/10]: Training Loss: 0.0638; Validation Loss: 0.0573
-New best model found! Validation Loss: 0.0573
-Epoch [2/10]: Training Loss: 0.0497; Validation Loss: 0.0327
-New best model found! Validation Loss: 0.0327
-Epoch [3/10]: Training Loss: 0.0358; Validation Loss: 0.0288
-New best model found! Validation Loss: 0.0288
-Epoch [4/10]: Training Loss: 0.0319; Validation Loss: 0.0265
-New best model found! Validation Loss: 0.0265
-Epoch [5/10]: Training Loss: 0.0290; Validation Loss: 0.0232
-New best model found! Validation Loss: 0.0232
-Epoch [6/10]: Training Loss: 0.0259; Validation Loss: 0.0192
-New best model found! Validation Loss: 0.0192
-Epoch [7/10]: Training Loss: 0.0223; Validation Loss: 0.0149
-New best model found! Validation Loss: 0.0149
-Epoch [8/10]: Training Loss: 0.0181; Validation Loss: 0.0124
-New best model found! Validation Loss: 0.0124
-Epoch [9/10]: Training Loss: 0.0149; Validation Loss: 0.0107
-New best model found! Validation Loss: 0.0107
-Epoch [10/10]: Training Loss: 0.0132; Validation Loss: 0.0102
-New best model found! Validation Loss: 0.0102
-Loss history saved to /home/lucash/NTUST_GIMT/2024_Fall_Semester/Machine_Learning/taiwan-surface-temperature/logs/2024-12-02-15-04/loss_history.json
-Training complete. Best Validation Loss: 0.0102
-```
+<img src="logs/2024-12-08-15-48/forecasts.png" width="1000" align="center">
 
-<img src="logs/2024-12-02-15-04/loss_plot.png" width="600" align="center">
-
-#### Test or evaluation
-For test so far I have only coded a class that can compute MSE Loss. It does so, as earlier explained, on the latter 20% of the dataset. It loads the model that achieved the lowest cross-validation score during the training loop, it computes the temperature predictions of that best model and compares it to the ground truth values on the dataset. With both predictions and ground truth, the MSE Loss is computed to give us an indicator of the performance of the trained model and a plot showing ground truth and prediction of temperature is generated and saved on the `logs` folder. There is samples of the execution in below code snippet, also the figure is shown (*Possible `TODO`: implement more evaluation metrics rather than just MSE Loss*).
-```bash
-Model loaded from /home/lucash/NTUST_GIMT/2024_Fall_Semester/Machine_Learning/taiwan-surface-temperature/checkpoints/best_model.pth
-Evaluating with cuda device.
-Evaluation Complete. MSE Loss: 0.0100
-Plot saved to /home/lucash/NTUST_GIMT/2024_Fall_Semester/Machine_Learning/taiwan-surface-temperature/logs/2024-12-02-15-04/predictions_vs_ground_truth.png
-```
-
-<img src="logs/2024-12-02-15-04/predictions_vs_ground_truth.png" width="600" align="center">
-
-*Again please note that the AverageTemperature target is normalized here, thus you do not see the expected ranges of temperature, this I can also change for presentation purposes later on.*
+<img src="logs/2024-12-08-15-48/ground_truth_vs_predictions.png" width="1000" align="center">
 
 ### Checkpoints
 Directory to save the best models after training, so it can later be used for testing,
 
 ### Logs
-Small folder to store loss records and loss plots during training and cross evaluation. Also predictions and ground truth with the test dataset.
+Small folder to store loss records and loss plots during training and cross evaluation. Also predictions and ground truth and forecasts with the test dataset.
 
 ### Miscellaneous: set-up-github 
 Small guide on how to set up Git and GitHub in your computer in case you want to collaborate on the repository.
