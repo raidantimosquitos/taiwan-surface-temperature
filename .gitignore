@@ -1,8 +1,5 @@
 # Ignore the following files
 datasets/berkeley-earth-surface-temp-datasets/GlobalLandTemperaturesByCity.csv
-datasets/berkeley-earth-surface-temp-datasets/GlobalLandTemperaturesByCountry.csv
-datasets/berkeley-earth-surface-temp-datasets/GlobalLandTemperaturesByMajorCity.csv
-datasets/berkeley-earth-surface-temp-datasets/GlobalLandTemperaturesByState.csv
 
 # Ignore the following directories
 datasets/world-cities-coordinates

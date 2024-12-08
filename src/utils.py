@@ -5,37 +5,6 @@ import torch
 import pandas as pd
 import matplotlib.pyplot as plt
 
-class AddLagFeatures:
-    def __init__(self, lag: int, target_columns: list, city_columns: str):
-        """
-        Add lag features for specific target columns.
-        :param lag: Number of lags to generate
-        :param target_columns: List of column names to apply lag features
-        :param city_columns: Column name to group by (e.g., City)
-        """
-        self.lag = lag
-        self.target_columns = target_columns
-        self.city_columns = city_columns
-
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Transform the dataframe by adding lag features grouped by the specified column.
-        :param df: Input dataframe
-        :return: Dataframe with lag features added
-        """
-        # Create a group identifier based on one-hot encoded city columns
-        df['Group'] = df[self.city_columns].idxmax(axis=1)  # Identify the city column with value 1
-
-        # Add lag features for each target column
-        for col in self.target_columns:
-            for i in range(1, self.lag + 1):
-                df[f"{col}_lag_{i}"] = df.groupby('Group')[col].shift(i)
-
-        # Drop the temporary group column and rows with NaN values introduced by lagging
-        df = df.drop(columns=['Group']).dropna()
-        
-        return df
-
 class ToTensor:
     def __call__(self, x, y):
         """
@@ -47,6 +16,34 @@ class ToTensor:
         x_tensor = torch.tensor(x, dtype=torch.float32)
         y_tensor = torch.tensor([y], dtype=torch.float32)
         return x_tensor, y_tensor
+    
+def create_sequences(dataset, seq_length):
+    """
+    Create sequences and corresponding targets from a PyTorch dataset.
+    
+    :param dataset: A PyTorch Dataset object with features and targets (already as tensors).
+    :param seq_length: The length of each sequence.
+    :return: Tensors for sequences (x) and targets (y).
+    """
+    sequences = []
+    targets = []
+
+    # Iterate through the dataset to extract sequences
+    for i in range(len(dataset) - seq_length):
+        # Extract sequence of features (stacked along sequence dimension)
+        x_seq = torch.stack([dataset[j][0] for j in range(i, i + seq_length)])
+        # Extract target for the sequence (single target at the end of the sequence)
+        y_target = dataset[i + seq_length][1]
+
+        sequences.append(x_seq)
+        targets.append(y_target)
+
+    # Convert lists to tensors (for efficient batching)
+    sequences = torch.stack(sequences)
+    targets = torch.stack(targets)
+
+    return sequences, targets
+
 
 def create_directory(path):
     """
@@ -92,8 +89,8 @@ def plot_losses(json_file_path, output_dir):
 
     # Generate the plot
     plt.figure(figsize=(10, 6))
-    plt.plot(loss_history["train_loss"], label="Training Loss", marker="o")
-    plt.plot(loss_history["val_loss"], label="Validation Loss", marker="o")
+    plt.plot(loss_history["train_loss"], label="Training Loss")
+    plt.plot(loss_history["val_loss"], label="Validation Loss")
     plt.xlabel("Epochs")
     plt.ylabel("Loss")
     plt.title("Training and Validation Loss Over Epochs")
