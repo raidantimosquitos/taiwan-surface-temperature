@@ -110,7 +110,7 @@ class ForecastFutureValues:
 
         forecasted_values = (forecasted_values - np.mean(forecasted_values))/np.std(forecasted_values)
         # Generate future dates
-        last_date = test_dates[-1]
+        last_date = test_dates[-2]
         future_dates = [last_date + pd.DateOffset(months=i) for i in range(1, num_forecast_steps + 1)]
 
         return {"forecasted_values": forecasted_values, "future_dates": future_dates}

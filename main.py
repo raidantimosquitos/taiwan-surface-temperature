@@ -37,6 +37,7 @@ def main():
     train_data = Subset(dataset, train_indices)
     cross_val_data = Subset(dataset, cross_val_indices)
 
+    # Create sequences to feed LSTM model 
     xtrain_sequences, ytrain_sequences = create_sequences(train_data, SEQUENCE_NO)
     ytrain_sequences = (ytrain_sequences - ytrain_sequences.mean())/ytrain_sequences.std()
 
@@ -164,7 +165,7 @@ if __name__ == '__main__':
     for key, values in forecast_res.items():
         plt.subplot(2, 2, j+1)
         plt.plot()
-        plt.plot(aux_dict['dates'][j][-36:], aux_dict['targets'][j][-36:], label="Historical Data", color="blue")
+        plt.plot(aux_dict['dates'][j][-36:-1], aux_dict['targets'][j][-36:-1], label="Historical Data", color="blue")
         plt.plot(
             values["future_dates"],
             values["forecasted_values"],
