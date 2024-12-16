@@ -116,18 +116,19 @@ class ForecastFutureValues:
         current_target = current_target.clone()
         with torch.no_grad():
             for step in range(num_forecast_steps):
-                # Make a prediction for the next step
-                predicted_value = self.model(current_input).cpu()
-                np_pred = predicted_value.numpy()[0,0]
+                # Prepare the input sequence tensor
+                sequence_tensor = torch.as_tensor(sequence_to_forecast).unsqueeze(0).float().to(self.device)
+                predicted_value = self.model(sequence_tensor).cpu().numpy()[0, 0]
 
-                # Denormalize the predicted value (if needed)
-                if mean_y is not None and std_y is not None:
-                    np_pred = np_pred * std_y + mean_y
+                forecasted_values.append(predicted_value)
 
-                # Add the forecasted value and corresponding future date
-                forecasted_values.append(np_pred)
-                future_date = initial_date + relativedelta(months= step + 1)
-                future_dates.append(future_date.replace(day=1))  # Ensure it's the first day of the month
+                # Update sequence: Shift features and add prediction as the new target
+                sequence_to_forecast = np.roll(sequence_to_forecast, shift=-1, axis=0)
+                sequence_to_forecast[-1, -1] = predicted_value  # Update the target value
 
-        # Return the forecasted values and future dates
+        forecasted_values = (forecasted_values - np.mean(forecasted_values))/np.std(forecasted_values)
+        # Generate future dates
+        last_date = test_dates[-1]
+        future_dates = [last_date + pd.DateOffset(months=i) for i in range(1, num_forecast_steps + 1)]
+
         return {"forecasted_values": forecasted_values, "future_dates": future_dates}
