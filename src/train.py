@@ -1,4 +1,5 @@
 import os
+from decimal import Decimal
 
 import json
 from datetime import datetime
@@ -14,7 +15,7 @@ from src.dataset import TWTemperatureDataset
 
 def train(model: LSTMModel, train_loader: DataLoader, cross_val_loader: DataLoader, 
           criterion: torch.nn, optimizer: optim, num_epochs: int, device: str, logs_dir: str, 
-          checkpoints_dir: str, scheduler: torch.optim.lr_scheduler = None):
+          checkpoints_dir: str, scheduler: torch.optim.lr_scheduler = None, max_grad_norm: float = 1.0):
     print(f'Training with {device} device.')
     model.to(device)
     best_val_loss = float("inf")
@@ -36,6 +37,9 @@ def train(model: LSTMModel, train_loader: DataLoader, cross_val_loader: DataLoad
             # Backward pass and optimization
             optimizer.zero_grad()
             loss.backward()
+
+            # Clip gradients to prevent exploding gradients
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm)
             optimizer.step()
 
             running_loss += loss.item()
@@ -54,6 +58,8 @@ def train(model: LSTMModel, train_loader: DataLoader, cross_val_loader: DataLoad
 
         val_loss /= len(cross_val_loader)
         train_loss = running_loss / len(train_loader)
+        train_rmse = (train_loss ** 0.5)
+        val_rmse = (val_loss ** 0.5)
         loss_history["train_loss"].append(train_loss)
         loss_history["val_loss"].append(val_loss)
 
@@ -62,9 +68,18 @@ def train(model: LSTMModel, train_loader: DataLoader, cross_val_loader: DataLoad
             before_lr = optimizer.param_groups[0]['lr']
             scheduler.step(val_loss)
             after_lr = optimizer.param_groups[0]['lr']
-            print(f"Epoch [{epoch+1}/{num_epochs}]: SGD lr {before_lr} --> {after_lr}; Training Loss: {train_loss:.4f}; Validation Loss: {val_loss:.4f}")
+            if before_lr != after_lr:
+                lr_print1 = '%.2E' % Decimal(before_lr)
+                lr_print2 = '%.2E' % Decimal(after_lr)
+                print(f"Epoch [{epoch+1}/{num_epochs}]: SGD lr {lr_print1} --> {lr_print2}; Training Loss: {train_loss:.4f}; Validation Loss: {val_loss:.4f}")
+                print(f"Train RMSE loss: {train_rmse:.4f}; Validation RMSE loss: {val_rmse:.4f}")
+            else:
+                lr_print = '%.2E' % Decimal(before_lr)
+                print(f"Epoch [{epoch+1}/{num_epochs}]: SGD lr {lr_print}; Training Loss: {train_loss:.4f}; Validation Loss: {val_loss:.4f}")
+                print(f"Train RMSE loss: {train_rmse:.4f}; Validation RMSE loss: {val_rmse:.4f}")
         else:
             print(f"Epoch [{epoch+1}/{num_epochs}]: Training Loss: {train_loss:.4f}; Validation Loss: {val_loss:.4f}")
+            print(f"Train RMSE loss: {train_rmse:.4f}; Validation RMSE loss: {val_rmse:.4f}")
         
         # Save the best model
         if val_loss < best_val_loss:

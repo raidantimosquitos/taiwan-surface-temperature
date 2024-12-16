@@ -3,7 +3,7 @@
 The final approach to the study is all contained in `data-summary-2.ipynb` notebook, which generates a `.csv` file containing the final dataset, this can be used to feed the models. The feature engenieering of the dataset is introduced below:
 
 #### Starting dataset study (from Kaggle file)
-The dataset has monthly frequency temperature records for cities all over the world. A description of the `Country = Taiwan` dataset is presented below:
+The [original dataset](https://www.kaggle.com/datasets/berkeleyearth/climate-change-earth-surface-temperature-data) has monthly frequency temperature records for cities all over the world. A description of the `Country = Taiwan` dataset is presented below:
 - **Dataset shape**: No. of Samples: `62190` - No. of Features: `7`.
 - **Features**: `[dt, AverageTemperature, AverageTemperatureUncertainty, City, Country, Latitude, Longitude]`
 - **City samples**: 2073 samples per city. 30 cities in total. 
@@ -94,21 +94,19 @@ At last a summary table of the test metrics is shown on screen.
 Summary of the metrics: 
 | Model      |   RMSE Loss |   R^2 Score |
 |------------+-------------+-------------|
-| Taiwan     |    0.310206 |    0.863688 |
-| North-East |    0.236149 |    0.938089 |
-| North-West |    0.196719 |    0.958322 |
-| South-East |    0.276329 |    0.920766 |
-| South-West |    0.236984 |    0.936852 |
+| Taiwan     |    0.304808 |    0.871888 |
+| North-East |    0.233262 |    0.940287 |
+| North-West |    0.195074 |    0.959127 |
+| South-East |    0.255398 |    0.925206 |
+| South-West |    0.237513 |    0.93603  |
 ```
 The split I have used for the whole training is [TimeSeriesSplit](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html) from sklearn, it is important not to shuffle the data in this case to preserve the temporal structure. The proportion is the first 60% of the samples (approx. from 1841 to 1950) is used as train data, the next 20% of the samples is used for cross-validation during the training loop, and the latter 20% of the samples (approx. from 1984 to 2013) is used for the testing phase.
 
-
-
 The loss function chosen to train has been MSE Loss, and Adam optimizer. The model has so far been trained for 10 epochs only, you can check all the hyperparameters in the `config.py` file. The data is feeded to the model in batches of 32 samples, after each batch, the model is validated on the cross-validation part of the dataset with the MSE Loss function (same as in training). The average training and cross-validation loss is computed after all batches of data have been feeded through the model and printed on screen. All the training records are saved in the `logs` directory, as well as the loss plot. The model with the best cross-validation loss is saved in the `checkpoints` directory, so it can be later retrieved for testing.
 
-<img src="logs/2024-12-08-15-48/forecasts.png" width="1000" align="center">
+<img src="logs/2024-12-09-12-47/forecasts.png" width="1000" align="center">
 
-<img src="logs/2024-12-08-15-48/ground_truth_vs_predictions.png" width="1000" align="center">
+<img src="logs/2024-12-09-12-47/ground_truth_vs_predictions.png" width="1000" align="center">
 
 ### Checkpoints
 Directory to save the best models after training, so it can later be used for testing,

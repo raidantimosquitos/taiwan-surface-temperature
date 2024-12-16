@@ -21,13 +21,13 @@ class TWTemperatureDataset(Dataset):
         else:
             df = dataframe.copy()  # Avoid modifying the original DataFrame
 
-
         if 'date' in df.columns.values.tolist():
             df.set_index('date', inplace=True)
       
         # Store data and configuration
         self.data = df
         self.target_column = target_column
+
         self.dates = self.data.index
         self.transforms = transforms or [ToTensor()]
 
@@ -61,6 +61,15 @@ class TWTemperatureDataset(Dataset):
         Returns the dates corresponding to the target values.
         """
         return self.dates.tolist()
+    
+    def get_mean_std(self, column):
+        """
+        Returns the mean and standard deviation of the target value
+        """
+        self.mean = self.data[column].mean()
+        self.std = self.data[column].std()
+
+        return self.mean, self.std
     
     def get_CityGroup(self, citygroup_name):
         """

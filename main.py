@@ -24,6 +24,8 @@ def main():
         transforms=[ToTensor()]
         )
     
+    mean_aux, std_aux = dataset.get_mean_std(TARGET_COLUMN)
+
     in_size = len(dataset.get_feature_names())
 
     # TimeSeriesSplit for train-crossval-test
@@ -37,11 +39,12 @@ def main():
     train_data = Subset(dataset, train_indices)
     cross_val_data = Subset(dataset, cross_val_indices)
 
+    # Create sequences to feed LSTM model 
     xtrain_sequences, ytrain_sequences = create_sequences(train_data, SEQUENCE_NO)
-    ytrain_sequences = (ytrain_sequences - ytrain_sequences.mean())/ytrain_sequences.std()
+    ytrain_sequences = (ytrain_sequences - mean_aux)/std_aux
 
     xcv_sequences, ycv_sequences = create_sequences(cross_val_data, SEQUENCE_NO)
-    ycv_sequences = (ycv_sequences - ycv_sequences.mean())/ycv_sequences.std()
+    ycv_sequences = (ycv_sequences - mean_aux)/std_aux
 
     sequenced_train_data = TensorDataset(xtrain_sequences, ytrain_sequences)
     sequenced_cv_data = TensorDataset(xcv_sequences, ycv_sequences)
@@ -51,7 +54,7 @@ def main():
     crossval_loader = DataLoader(sequenced_cv_data, batch_size=BATCH_SIZE, shuffle=False)
 
     # Model, criterion, optimizer
-    model = LSTMModel(input_dim=in_size, hidden_dim=64, num_layers=1, output_dim=1)
+    model = LSTMModel(input_dim=in_size, hidden_dim=128, num_layers=2, output_dim=1)
     criterion = torch.nn.MSELoss()  # Using MSE for regression
     optimizer = torch.optim.Adam(model.parameters(), lr=LR, weight_decay=1e-4)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
@@ -65,7 +68,7 @@ def main():
     test_data = Subset(dataset, test_indices)
 
     xtest_sequences, ytest_sequences = create_sequences(test_data, SEQUENCE_NO)
-    ytest_sequences = (ytest_sequences - ytest_sequences.mean())/ytest_sequences.std()
+    ytest_sequences = (ytest_sequences - mean_aux)/std_aux
     sequenced_test_data = TensorDataset(xtest_sequences, ytest_sequences)
 
     # Data loaders
@@ -77,16 +80,20 @@ def main():
     # Initialize and evaluate the model
     best_model_path = os.path.join(CHECKPOINTS_DIR, 'best_model.pth')
     evaluator = ForecastFutureValues(model=model, checkpoint_path=best_model_path, device=DEVICE)
-    city_eval_results['Taiwan'] = evaluator.evaluate(test_loader, test_dates)
+    city_eval_results['Taiwan'] = evaluator.evaluate(test_loader, test_dates, mean_y=mean_aux, std_y=std_aux)
 
     # Train, evaluate and forecast models for each CityGroup
     city_groups = ['North-East', 'North-West', 'South-East', 'South-West']
+    mean_aux = 0.0
+    std_aux = 0.0
     
     for city_group in city_groups:
         print(f"\nTraining for city group: {city_group}...")
 
         # Get city-specific data
         city_dataset = dataset.get_CityGroup(city_group)
+        mean_aux, std_aux = city_dataset.get_mean_std(TARGET_COLUMN)
+
         city_in_size = len(city_dataset.get_feature_names())
         city_train_idxs, city_test_idxs = list(tscv.split(city_dataset))[-1]
 
@@ -94,10 +101,10 @@ def main():
         city_test_data = Subset(city_dataset, city_test_idxs)
 
         xtrain_city, ytrain_city = create_sequences(city_train_data, SEQUENCE_NO)
-        ytrain_city = (ytrain_city - ytrain_city.mean())/ytrain_city.std()
+        ytrain_city = (ytrain_city - mean_aux)/std_aux
 
         xtest_city, ytest_city = create_sequences(city_test_data, SEQUENCE_NO)
-        ytest_city = (ytest_city - ytest_city.mean())/ytest_city.std()
+        ytest_city = (ytest_city - mean_aux) / std_aux
 
         citytrain_sequenced_data = TensorDataset(xtrain_city, ytrain_city)
         citytest_sequenced_data = TensorDataset(xtest_city, ytest_city)
@@ -111,7 +118,7 @@ def main():
         city_test_dates = [datetime.strptime(date, "%Y-%m-%d") for date in city_dates[-len(citytest_sequenced_data):]]
 
         # Training loop
-        city_model = LSTMModel(input_dim= city_in_size, hidden_dim=64, num_layers=1, output_dim=1)
+        city_model = LSTMModel(input_dim= city_in_size, hidden_dim=128, num_layers=2, output_dim=1)
         city_optimizer = torch.optim.Adam(city_model.parameters(), lr=LR, weight_decay=1e-4)
         city_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(city_optimizer)
 
@@ -127,8 +134,8 @@ def main():
 
         print(f'Evaluate and forecast for CityGroup {city_group}')
         city_evaluator = ForecastFutureValues(model=city_model, checkpoint_path=best_model_path, device=DEVICE)
-        city_eval_results[city_group] = city_evaluator.evaluate(citytest_loader, city_test_dates)
-        city_forecast_results[city_group] = city_evaluator.forecast(citytest_sequenced_data, city_test_dates)
+        city_eval_results[city_group] = city_evaluator.evaluate(citytest_loader, city_test_dates, mean_y=mean_aux, std_y=std_aux)
+        city_forecast_results[city_group] = city_evaluator.forecast(citytest_sequenced_data, city_test_dates, num_forecast_steps=SEQUENCE_NO, mean_y=mean_aux, std_y=std_aux)
 
     return directory_logs, city_eval_results, city_forecast_results      
 
@@ -152,7 +159,7 @@ if __name__ == '__main__':
             plt.ylabel('Temperature')
             # Format x-axis to show dates properly
             # Format the x-axis to display only years (or customize as needed)
-            plt.gca().xaxis.set_major_locator(mdates.YearLocator(), )  # Show every year
+            plt.gca().xaxis.set_major_locator(mdates.YearLocator())  # Show every year
             plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y'))  # Format as Year (YYYY)
             plt.gca().xaxis.set_major_locator(ticker.MaxNLocator(10))
             plt.legend()
@@ -164,7 +171,7 @@ if __name__ == '__main__':
     for key, values in forecast_res.items():
         plt.subplot(2, 2, j+1)
         plt.plot()
-        plt.plot(aux_dict['dates'][j][-36:], aux_dict['targets'][j][-36:], label="Historical Data", color="blue")
+        plt.plot(aux_dict['dates'][j][-36:-1], aux_dict['targets'][j][-36:-1], label="Historical Data", color="blue")
         plt.plot(
             values["future_dates"],
             values["forecasted_values"],
@@ -184,6 +191,7 @@ if __name__ == '__main__':
         plt.savefig(os.path.join(directory_logs, 'forecasts.png'))
         j += 1
 
+    # Print a summary table with test results
     key_list = list(test_res.keys())
     headers = ['Model', 'RMSE Loss', 'R^2 Score']
     aux_list = [[i, test_res[i]['rmse'], test_res[i]['r2_score']] for i in key_list]
